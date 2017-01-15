@@ -1,4 +1,5 @@
 import { Plug } from './plug';
+import * as vscode from 'vscode';
 
 /**
  * 16ビットバス
@@ -8,10 +9,17 @@ export class Bas16bit<T> {
     private _connecterA : Plug<T>;
     private _connecterB : Plug<T>;
 
+    private _emitter: vscode.EventEmitter<T>;
+
+    public get onValueChanged(): vscode.Event<T>{
+        return this._emitter.event;
+    }
+
     // TODO: 接続先との通信用のインターフェースを渡す
     constructor() {
         this._connecterA = new Plug(this);
         this._connecterB = new Plug(this);
+        this._emitter = new vscode.EventEmitter();
     }
 
     
@@ -22,6 +30,7 @@ export class Bas16bit<T> {
     
     public set value(v : T) {
         this._value = v;
+        this._emitter.fire(v);
     }
     
     

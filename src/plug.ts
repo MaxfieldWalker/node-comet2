@@ -18,7 +18,6 @@ export class Plug<T> {
 
     // 他のコネクタと接続する
 
-    // TODO: 複数に接続できるようにする
     public connectWith(outlet: Outlet<T>) {
         this._otherOutlet = outlet;
         outlet.addBas(this._bas);

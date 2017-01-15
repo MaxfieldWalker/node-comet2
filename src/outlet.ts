@@ -29,6 +29,9 @@ export class Outlet<T> {
 
     public addBas(bas: Bas16bit<T>) {
         this._bases.push(bas);
+        bas.onValueChanged(value => {
+            console.log("Value: " + value);
+        });
     }
 
     public unsetBas(bas: Bas16bit<T>) {
