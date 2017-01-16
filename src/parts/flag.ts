@@ -21,10 +21,16 @@ export class Flag {
 
     }
 
+    /**
+     * フラグを立てる
+     */
     public raise() {
         this._value = true;
     }
 
+    /**
+     * フラグを下ろす
+     */
     public putdown() {
         this._value = false;
     }
