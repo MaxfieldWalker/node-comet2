@@ -1,5 +1,5 @@
 import { Plug } from './plug';
-import * as vscode from 'vscode';
+import { EventEmitter } from 'events';
 
 /**
  * 16ビットバス
