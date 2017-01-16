@@ -2,6 +2,8 @@
 
 import { Register16bit } from '../parts/register16bit';
 import { Flag } from '../parts/flag';
+import { Stack } from '../parts/stack';
+import { Memory } from '../parts/memory';
 
 /**
  * Comet2
@@ -63,6 +65,13 @@ class Comet2 {
         return this._ZF;
     }
 
+    public get SP(){
+        return this._stack.SP;
+    }
+
+    private _stack: Stack;
+    private _memory: Memory;
+
     constructor() {
         this._GR0 = new Register16bit("GR0", false, 0);
         this._GR1 = new Register16bit("GR1", true, 0);
@@ -76,5 +85,8 @@ class Comet2 {
         this._OF = new Flag("OF");
         this._SF = new Flag("SF");
         this._ZF = new Flag("ZF");
+
+        this._memory = new Memory();
+        this._stack = new Stack(this._memory);
     }
 }
