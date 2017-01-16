@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 
-import { DataBas } from '../src/databas';
-import { Outlet } from '../src/outlet';
+import { DataBas } from '../src/parts/databas';
+import { Outlet } from '../src/parts/outlet';
 
 suite('Bas Tests', () => {
     test('value changed', () => {
@@ -19,18 +19,18 @@ suite('Bas Tests', () => {
 
         // どこから値を入れても値が伝達されるか
         outlet1.setValue(3);
-        assert.equal(outlet1.getValue(), 3);
-        assert.equal(outlet2.getValue(), 3);
-        assert.equal(outlet3.getValue(), 3);
+        assert.equal(outlet1.value, 3);
+        assert.equal(outlet2.value, 3);
+        assert.equal(outlet3.value, 3);
 
         outlet2.setValue(5);
-        assert.equal(outlet1.getValue(), 5);
-        assert.equal(outlet2.getValue(), 5);
-        assert.equal(outlet3.getValue(), 5);
+        assert.equal(outlet1.value, 5);
+        assert.equal(outlet2.value, 5);
+        assert.equal(outlet3.value, 5);
 
         outlet3.setValue(7);
-        assert.equal(outlet1.getValue(), 7);
-        assert.equal(outlet2.getValue(), 7);
-        assert.equal(outlet3.getValue(), 7);
+        assert.equal(outlet1.value, 7);
+        assert.equal(outlet2.value, 7);
+        assert.equal(outlet3.value, 7);
     });
 });

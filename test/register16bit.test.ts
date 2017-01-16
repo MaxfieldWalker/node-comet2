@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { Register16bit } from '../src/register16bit';
+import { Register16bit } from '../src/parts/register16bit';
 
 suite('Register16bit Tests', () => {
     test('name', () => {

@@ -1,7 +1,7 @@
 'use strict'
 
-import { Register16bit } from './register16bit';
-import { Flag } from './flag';
+import { Register16bit } from '../parts/register16bit';
+import { Flag } from '../parts/flag';
 
 /**
  * Comet2

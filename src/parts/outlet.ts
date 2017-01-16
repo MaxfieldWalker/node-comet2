@@ -1,5 +1,6 @@
-import { Bas16bit } from './Bas16bits';
+import { Bas16bit } from './bas16bit';
 import { ValueChangedEventArgs } from './valueChangedEventArgs';
+import { EventEmitter } from '../common/eventEmitter';
 
 /**
  * Outlet
@@ -7,29 +8,44 @@ import { ValueChangedEventArgs } from './valueChangedEventArgs';
  */
 export class Outlet<T> {
     private _bases: Array<[Bas16bit<T>, (args: ValueChangedEventArgs<T>) => void]>;
+    private _value: T;
+    private _emitter: EventEmitter<T>;
 
     constructor() {
         this._bases = new Array();
+        this._emitter = new EventEmitter();
     }
 
     /**
      * 値をセットする
     */
     public setValue(value: T) {
+        this.updateValue(value);
+
         this._bases.forEach(tuple => {
             tuple[0].value = value;
         });
     }
 
-    public getValue(): T {
-        if (this._bases.length == 0) return null;
+    public get value(): T {
+        return this._value;
+    }
 
-        // バスのどれも同じ値なので1つ目のバスの値を返す
-        return this._bases[0][0].value;
+    private updateValue(value: T) {
+        if (this._value != value) {
+            this._value = value;
+            this._emitter.fire(value);
+        }
+    }
+
+    public get valueChanged() {
+        return this._emitter;
     }
 
     public addBas(bas: Bas16bit<T>) {
         let handler = (args: ValueChangedEventArgs<T>) => {
+            this.updateValue(args.value);
+
             // 自分自身でなく変更元でもないものに変更を伝える
             this._bases.filter(x => x[0] != bas).filter(x => x[0] != args.source).forEach(x => {
                 if (x[0].value != args.value) {

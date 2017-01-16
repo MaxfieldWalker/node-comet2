@@ -1,4 +1,4 @@
-import { Bas16bit } from './Bas16bits';
+import { Bas16bit } from './bas16bit';
 import { Outlet } from './outlet';
 
 /**

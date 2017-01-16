@@ -1,5 +1,5 @@
 import { Plug } from './plug';
-import { EventEmitter } from './eventEmitter'
+import { EventEmitter } from '../common/eventEmitter'
 import { ValueChangedEventArgs } from './valueChangedEventArgs';
 
 /**
