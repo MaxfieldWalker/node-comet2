@@ -27,7 +27,7 @@ export class Plug<T> {
      * アウトレットとの接続を解除する
      */
     public disconnect() {
-        this._otherOutlet.unsetBas(this._bas);
+        this._otherOutlet.removeBas(this._bas);
         this._otherOutlet = null;
     }
 }
