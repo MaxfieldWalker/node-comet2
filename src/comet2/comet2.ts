@@ -128,6 +128,25 @@ export class Comet2 {
         let r2 = this.numberToGR(v & 0x000F);
         let address = this._memory.getMemroyValue(pr + 1 + offset);
 
+        // NOP命令
+        if (inst == 0x00) {
+
+        }
+
+        // LD命令(アドレス有り)
+        if (inst == 0x10) {
+
+        }
+        // LD命令(アドレス無し)        
+        if (inst == 0x14) {
+
+        }
+
+        // ST命令
+        if (inst == 0x11) {
+
+        }
+
         // LAD命令
         if (inst == 0x12) {
             this.lad(r1, r2, address);
@@ -135,6 +154,7 @@ export class Comet2 {
             let newPR = pr + 2;
             this._PR.value = newPR;
         }
+
 
         // ADDA命令(アドレス無し)
         if (inst == 0x24) {
@@ -147,6 +167,78 @@ export class Comet2 {
             this.adda(r1, r2, address);
             let newPR = pr + 2;
             this._PR.value = newPR;
+        }
+
+        // ADDL命令(アドレス無し)
+        if (inst == 0x26) {
+
+        }
+        // ADDL命令(アドレス有り)        
+        if (inst == 0x22) {
+
+        }
+
+        // SUBA命令(アドレス無し)
+        if (inst == 0x25) {
+
+        }
+        // SUBA命令(アドレス有り)        
+        if (inst == 0x21) {
+
+        }
+
+        // SUBL命令(アドレス無し)
+        if (inst == 0x27) {
+
+        }
+        // SUBL命令(アドレス有り)        
+        if (inst == 0x23) {
+
+        }
+
+        // AND命令(アドレス無し)
+        if (inst == 0x34) {
+
+        }
+        // AND命令(アドレス有り)        
+        if (inst == 0x30) {
+
+        }
+
+        // OR命令(アドレス無し)
+        if (inst == 0x35) {
+
+        }
+        // OR命令(アドレス有り)        
+        if (inst == 0x31) {
+
+        }
+
+        // XOR命令(アドレス無し)
+        if (inst == 0x36) {
+
+        }
+        // XOR命令(アドレス有り)        
+        if (inst == 0x32) {
+
+        }
+
+        // CPA命令(アドレス無し)
+        if (inst == 0x44) {
+
+        }
+        // CPA命令(アドレス有り)        
+        if (inst == 0x40) {
+
+        }
+
+        // CPL命令(アドレス無し)
+        if (inst == 0x45) {
+
+        }
+        // SUBA命令(アドレス有り)        
+        if (inst == 0x41) {
+
         }
 
         if (inst != 0x81) {
