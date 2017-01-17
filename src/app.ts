@@ -6,7 +6,7 @@ import { Reader } from './io/reader';
 
 let alu = new ALU();
 
-let buf = Reader.read('./temp.com');
+let buf = Reader.read('./test/testdata/temp.com');
 console.log(buf.toString());
 
 let dump = HexdumpHelper.dump(buf);

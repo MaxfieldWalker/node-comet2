@@ -91,8 +91,10 @@ export class Comet2 {
         this._ZF = new Flag("ZF");
 
         this._memory = new Memory();
-        // メモリにプログラムを載せる
-        this._memory.load(memory);
+        if (memory) {
+            // メモリにプログラムを載せる
+            this._memory.load(memory);
+        }
 
         this._stack = new Stack(this._memory);
         this._alu = new ALU();
