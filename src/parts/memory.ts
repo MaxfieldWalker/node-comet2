@@ -1,5 +1,5 @@
 
-namespace MemoryConst{
+namespace MemoryConst {
     export const MinIndex = 0;
     export const MaxIndex = 65535;
 }
@@ -13,6 +13,13 @@ export class Memory {
 
     constructor() {
         this._memory = new Array(MemoryConst.MaxIndex - MemoryConst.MinIndex + 1);
+    }
+
+    public load(memory: Array<number>) {
+        for (var i = 0; i < memory.length; i++) {
+            let value = memory[i];
+            this.setMemoryValue(value, i);
+        }
     }
 
     /**

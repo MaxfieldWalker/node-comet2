@@ -4,7 +4,7 @@ import { Register16bit } from '../parts/register16bit';
 import { Flag } from '../parts/flag';
 import { Stack } from '../parts/stack';
 import { Memory } from '../parts/memory';
-import { ALU } from './alu';
+import { ALU, ALUMode } from './alu';
 
 /**
  * Comet2
@@ -73,8 +73,10 @@ export class Comet2 {
     private _stack: Stack;
     private _memory: Memory;
     private _alu: ALU;
+    private _PR: Register16bit;
 
-    constructor() {
+
+    constructor(memory?: Array<number>) {
         this._GR0 = new Register16bit("GR0", false, 0);
         this._GR1 = new Register16bit("GR1", true, 0);
         this._GR2 = new Register16bit("GR2", true, 0);
@@ -89,11 +91,66 @@ export class Comet2 {
         this._ZF = new Flag("ZF");
 
         this._memory = new Memory();
+        // メモリにプログラムを載せる
+        this._memory.load(memory);
+
         this._stack = new Stack(this._memory);
         this._alu = new ALU();
+
+        // PRの最初の値は0
+        this._PR = new Register16bit("PR", false, 0);
     }
 
-    public processInstuction(instruction: string) {
+    private numberToGR(n: number): GR {
+        if (n == 0) return GR.GR0;
+        if (n == 1) return GR.GR1;
+        if (n == 2) return GR.GR2;
+        if (n == 3) return GR.GR3;
+        if (n == 4) return GR.GR4;
+        if (n == 5) return GR.GR5;
+        if (n == 6) return GR.GR6;
+        if (n == 7) return GR.GR7;
+    }
+
+    public run() {
+        let pr = this._PR.value;
+        // TODO: .comファイルの先頭にラベル名を含めないならoffsetは不要
+        let offset = 8;
+        // PRの位置にある命令を取得
+        let v = this._memory.getMemroyValue(pr + offset);
+        // 上二桁が命令である
+        let inst = (v & 0xFF00) >> 8;
+        // r1は3桁目にある
+        let r1 = this.numberToGR((v & 0x00F0) >> 4);
+        // r2は4桁目にある
+        let r2 = this.numberToGR(v & 0x000F);
+        let address = this._memory.getMemroyValue(pr + 1 + offset);
+
+        // LAD命令
+        if (inst == 0x12) {
+            this.lad(r1, r2, address);
+
+            let newPR = pr + 2;
+            this._PR.value = newPR;
+        }
+
+        // ADDA命令(アドレス無し)
+        if (inst == 0x24) {
+            this.adda(r1, r2);
+            let newPR = pr + 1
+            this._PR.value = newPR;
+        }
+        // ADDA命令(アドレス有り)
+        if (inst == 0x20) {
+            this.adda(r1, r2, address);
+            let newPR = pr + 2;
+            this._PR.value = newPR;
+        }
+
+        if (inst != 0x81) {
+            // TODO: 終了条件を本番用にする
+            this.run();
+        }
     }
 
     /**
@@ -110,14 +167,31 @@ export class Comet2 {
     /**
      * ADDA命令
      */
-    public adda(r1: GR, r2: GR, adr: number) {
+    public adda(r1: GR, r2: GR, adr?: number) {
         let reg1 = this.grToReg(r1);
         let reg2 = this.grToReg(r2);
 
-        let v2 = this.effectiveAddressContent(reg2, adr);
         this._alu.inputA.setValue(reg1.value);
+        let v2 = this.effectiveAddressContent(reg2, adr);
         this._alu.inputB.setValue(v2);
 
+        this._alu.mode.setValue(ALUMode.ADD);
+        // ALUから結果を取り出してレジスタに入れる
+        reg1.value = this._alu.output.value;
+    }
+
+    /**
+     * SUBA命令
+     */
+    public suba(r1: GR, r2: GR, adr?: number) {
+        let reg1 = this.grToReg(r1);
+        let reg2 = this.grToReg(r2);
+
+        this._alu.inputA.setValue(reg1.value);
+        let v2 = this.effectiveAddressContent(reg2, adr);
+        this._alu.inputB.setValue(v2);
+
+        this._alu.mode.setValue(ALUMode.SUB);
         // ALUから結果を取り出してレジスタに入れる
         reg1.value = this._alu.output.value;
     }
@@ -155,7 +229,11 @@ export class Comet2 {
      * 実効アドレスの内容を返す
      */
     private effectiveAddressContent(reg: Register16bit, adr: number) {
-        return this._memory.getMemroyValue(this.effectiveAddress(reg, adr));
+        if (adr == 0 || adr == undefined) {
+            return reg.value;
+        } else {
+            return this._memory.getMemroyValue(this.effectiveAddress(reg, adr));
+        }
     }
 
     private grToReg(r: GR): Register16bit {
