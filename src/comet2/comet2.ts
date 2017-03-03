@@ -153,26 +153,12 @@ export class Comet2 {
         }
 
         // LAD命令
-        if (inst == 0x12) {
-            this.lad(r1, r2, address);
-
-            const newPR = pr + 2;
-            this._PR.value = newPR;
-        }
-
-
+        if (inst == 0x12) this.lad(r1, r2, address);
         // ADDA命令(アドレス無し)
-        if (inst == 0x24) {
-            this.adda(r1, r2);
-            const newPR = pr + 1
-            this._PR.value = newPR;
-        }
+        if (inst == 0x24) this.adda(r1, r2);
         // ADDA命令(アドレス有り)
-        if (inst == 0x20) {
-            this.adda(r1, r2, address);
-            const newPR = pr + 2;
-            this._PR.value = newPR;
-        }
+        if (inst == 0x20) this.adda(r1, r2, address);
+
 
         // ADDL命令(アドレス無し)
         if (inst == 0x26) {
@@ -252,6 +238,11 @@ export class Comet2 {
         }
     }
 
+    private updatePR(adr?: number) {
+        const newPR = this._PR.value + (adr === undefined ? 1 : 2);
+        this._PR.value = newPR;
+    }
+
     /**
      * LAD命令
      */
@@ -261,6 +252,8 @@ export class Comet2 {
 
         const v2 = this.effectiveAddress(reg2, adr);
         reg1.value = v2;
+
+        this.updatePR(adr);
     }
 
     /**
@@ -277,6 +270,8 @@ export class Comet2 {
         this._alu.mode.setValue(ALUMode.ADD);
         // ALUから結果を取り出してレジスタに入れる
         reg1.value = this._alu.output.value;
+
+        this.updatePR(adr);
     }
 
     /**
