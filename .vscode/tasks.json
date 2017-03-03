@@ -6,27 +6,18 @@
 	"showOutput": "always",
 	"tasks": [
 		{
-			"taskName": "compile",
+			"taskName": "build",
+			"isBuildCommand": true,
 			"args": [
 				"run",
 				"compile"
 			]
 		},
 		{
-			"taskName": "watch",
-			"isWatching": true,
+			"taskName": "test",
+			"isTestCommand": true,
 			"args": [
-				"run",
-				"watch"
-			],
-			"problemMatcher": "$tsc-watch"
-		},
-		{
-			"taskName": "run",
-			"isBuildCommand": true,
-			"args": [
-				"run",
-				"run"
+				"test"
 			]
 		}
 	]

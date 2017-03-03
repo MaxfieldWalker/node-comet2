@@ -1,5 +1,7 @@
-import { Bas16bit } from './bas16bit';
-import { Outlet } from './outlet';
+"use strict";
+
+import { Bas16bit } from "./bas16bit";
+import { Outlet } from "./outlet";
 
 /**
  * Connector<T>
@@ -7,13 +9,15 @@ import { Outlet } from './outlet';
 export class Plug<T> {
     private _bas: Bas16bit<T>;
     // 接続されたアウトレット
-    private _otherOutlet: Outlet<T>;
+    private _otherOutlet: Outlet<T> | undefined;
 
     // TODO: 今はバスをコンストラクタに取っているが
     //       要するにコネクタがどこから値を得るかを知れればよい。
     //       値の取得元をインターフェース化する
     constructor(bas?: Bas16bit<T>) {
-        this._bas = bas;
+        if (bas) {
+            this._bas = bas;
+        }
     }
 
     // 他のコネクタと接続する
@@ -27,7 +31,9 @@ export class Plug<T> {
      * アウトレットとの接続を解除する
      */
     public disconnect() {
-        this._otherOutlet.removeBas(this._bas);
-        this._otherOutlet = null;
+        if (this._otherOutlet) {
+            this._otherOutlet.removeBas(this._bas);
+            this._otherOutlet = undefined;
+        }
     }
 }

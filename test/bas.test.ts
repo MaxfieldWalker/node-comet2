@@ -1,16 +1,16 @@
-import * as assert from 'assert';
+import * as assert from "assert";
 
-import { DataBas } from '../src/parts/databas';
-import { Outlet } from '../src/parts/outlet';
+import { DataBas } from "../src/parts/databas";
+import { Outlet } from "../src/parts/outlet";
 
-suite('Bas Tests', () => {
-    test('value changed', () => {
-        let bas1 = new DataBas();
-        let bas2 = new DataBas();
+suite("Bas Tests", () => {
+    test("value changed", () => {
+        const bas1 = new DataBas();
+        const bas2 = new DataBas();
 
-        let outlet1 = new Outlet<number>();
-        let outlet2 = new Outlet<number>();
-        let outlet3 = new Outlet<number>();
+        const outlet1 = new Outlet<number>();
+        const outlet2 = new Outlet<number>();
+        const outlet3 = new Outlet<number>();
         bas1.connecterA.connectWith(outlet1);
         bas1.connecterB.connectWith(outlet2);
 

@@ -1,9 +1,9 @@
-'use strict';
+"use strict";
 
-import { Reader } from '../../src/io/reader';
+import { Reader } from "../../src/io/reader";
 
-suite('Reader test', () => {
-    test('read', () => {
-        let buf = Reader.read('./src/app.ts');
+suite("Reader test", () => {
+    test("read", () => {
+        const buf = Reader.read("./src/app.ts");
     })
 });

@@ -1,7 +1,7 @@
-'use strict';
+"use strict";
 
-import { Memory } from './memory';
-import { Outlet } from './outlet';
+import { Memory } from "./memory";
+import { Outlet } from "./outlet";
 
 export class Stack {
     private _memory: Memory;
@@ -20,14 +20,14 @@ export class Stack {
     }
 
     public push(value: number) {
-        let newSp = this._sp.value - 1;
+        const newSp = this._sp.value - 1;
         this._sp.setValue(newSp);
         this._memory.setMemoryValue(value, newSp);
     }
 
     public pop(): number {
-        let oldSp = this._sp.value;
-        let newSp = oldSp + 1;
+        const oldSp = this._sp.value;
+        const newSp = oldSp + 1;
         this._sp.setValue(newSp);
         return this._memory.getMemroyValue(oldSp);
     }

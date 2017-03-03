@@ -1,10 +1,10 @@
-'use strict'
+"use strict"
 
-import { Register16bit } from '../parts/register16bit';
-import { Flag } from '../parts/flag';
-import { Stack } from '../parts/stack';
-import { Memory } from '../parts/memory';
-import { ALU, ALUMode } from './alu';
+import { Register16bit } from "../parts/register16bit";
+import { Flag } from "../parts/flag";
+import { Stack } from "../parts/stack";
+import { Memory } from "../parts/memory";
+import { ALU, ALUMode } from "./alu";
 
 /**
  * Comet2
@@ -66,10 +66,6 @@ export class Comet2 {
         return this._ZF;
     }
 
-    public get SP() {
-        return this._stack.SP;
-    }
-
     private _stack: Stack;
     private _memory: Memory;
     private _alu: ALU;
@@ -112,21 +108,23 @@ export class Comet2 {
         if (n == 5) return GR.GR5;
         if (n == 6) return GR.GR6;
         if (n == 7) return GR.GR7;
+
+        throw new Error();
     }
 
     public run() {
-        let pr = this._PR.value;
+        const pr = this._PR.value;
         // TODO: .comファイルの先頭にラベル名を含めないならoffsetは不要
-        let offset = 8;
+        const offset = 8;
         // PRの位置にある命令を取得
-        let v = this._memory.getMemroyValue(pr + offset);
+        const v = this._memory.getMemroyValue(pr + offset);
         // 上二桁が命令である
-        let inst = (v & 0xFF00) >> 8;
+        const inst = (v & 0xFF00) >> 8;
         // r1は3桁目にある
-        let r1 = this.numberToGR((v & 0x00F0) >> 4);
+        const r1 = this.numberToGR((v & 0x00F0) >> 4);
         // r2は4桁目にある
-        let r2 = this.numberToGR(v & 0x000F);
-        let address = this._memory.getMemroyValue(pr + 1 + offset);
+        const r2 = this.numberToGR(v & 0x000F);
+        const address = this._memory.getMemroyValue(pr + 1 + offset);
 
         // NOP命令
         if (inst == 0x00) {
@@ -137,7 +135,7 @@ export class Comet2 {
         if (inst == 0x10) {
 
         }
-        // LD命令(アドレス無し)        
+        // LD命令(アドレス無し)
         if (inst == 0x14) {
 
         }
@@ -151,7 +149,7 @@ export class Comet2 {
         if (inst == 0x12) {
             this.lad(r1, r2, address);
 
-            let newPR = pr + 2;
+            const newPR = pr + 2;
             this._PR.value = newPR;
         }
 
@@ -159,13 +157,13 @@ export class Comet2 {
         // ADDA命令(アドレス無し)
         if (inst == 0x24) {
             this.adda(r1, r2);
-            let newPR = pr + 1
+            const newPR = pr + 1
             this._PR.value = newPR;
         }
         // ADDA命令(アドレス有り)
         if (inst == 0x20) {
             this.adda(r1, r2, address);
-            let newPR = pr + 2;
+            const newPR = pr + 2;
             this._PR.value = newPR;
         }
 
@@ -173,7 +171,7 @@ export class Comet2 {
         if (inst == 0x26) {
 
         }
-        // ADDL命令(アドレス有り)        
+        // ADDL命令(アドレス有り)
         if (inst == 0x22) {
 
         }
@@ -182,7 +180,7 @@ export class Comet2 {
         if (inst == 0x25) {
 
         }
-        // SUBA命令(アドレス有り)        
+        // SUBA命令(アドレス有り)
         if (inst == 0x21) {
 
         }
@@ -191,7 +189,7 @@ export class Comet2 {
         if (inst == 0x27) {
 
         }
-        // SUBL命令(アドレス有り)        
+        // SUBL命令(アドレス有り)
         if (inst == 0x23) {
 
         }
@@ -200,7 +198,7 @@ export class Comet2 {
         if (inst == 0x34) {
 
         }
-        // AND命令(アドレス有り)        
+        // AND命令(アドレス有り)
         if (inst == 0x30) {
 
         }
@@ -209,7 +207,7 @@ export class Comet2 {
         if (inst == 0x35) {
 
         }
-        // OR命令(アドレス有り)        
+        // OR命令(アドレス有り)
         if (inst == 0x31) {
 
         }
@@ -218,7 +216,7 @@ export class Comet2 {
         if (inst == 0x36) {
 
         }
-        // XOR命令(アドレス有り)        
+        // XOR命令(アドレス有り)
         if (inst == 0x32) {
 
         }
@@ -227,7 +225,7 @@ export class Comet2 {
         if (inst == 0x44) {
 
         }
-        // CPA命令(アドレス有り)        
+        // CPA命令(アドレス有り)
         if (inst == 0x40) {
 
         }
@@ -236,7 +234,7 @@ export class Comet2 {
         if (inst == 0x45) {
 
         }
-        // SUBA命令(アドレス有り)        
+        // SUBA命令(アドレス有り)
         if (inst == 0x41) {
 
         }
@@ -251,10 +249,10 @@ export class Comet2 {
      * LAD命令
      */
     public lad(r1: GR, r2: GR, adr: number) {
-        let reg1 = this.grToReg(r1);
-        let reg2 = this.grToReg(r2);
+        const reg1 = this.grToReg(r1);
+        const reg2 = this.grToReg(r2);
 
-        let v2 = this.effectiveAddress(reg2, adr);
+        const v2 = this.effectiveAddress(reg2, adr);
         reg1.value = v2;
     }
 
@@ -262,11 +260,11 @@ export class Comet2 {
      * ADDA命令
      */
     public adda(r1: GR, r2: GR, adr?: number) {
-        let reg1 = this.grToReg(r1);
-        let reg2 = this.grToReg(r2);
+        const reg1 = this.grToReg(r1);
+        const reg2 = this.grToReg(r2);
 
         this._alu.inputA.setValue(reg1.value);
-        let v2 = this.effectiveAddressContent(reg2, adr);
+        const v2 = this.effectiveAddressContent(reg2, adr);
         this._alu.inputB.setValue(v2);
 
         this._alu.mode.setValue(ALUMode.ADD);
@@ -278,11 +276,11 @@ export class Comet2 {
      * SUBA命令
      */
     public suba(r1: GR, r2: GR, adr?: number) {
-        let reg1 = this.grToReg(r1);
-        let reg2 = this.grToReg(r2);
+        const reg1 = this.grToReg(r1);
+        const reg2 = this.grToReg(r2);
 
         this._alu.inputA.setValue(reg1.value);
-        let v2 = this.effectiveAddressContent(reg2, adr);
+        const v2 = this.effectiveAddressContent(reg2, adr);
         this._alu.inputB.setValue(v2);
 
         this._alu.mode.setValue(ALUMode.SUB);
@@ -294,16 +292,10 @@ export class Comet2 {
      * LD命令
      */
     public ld(r1: GR, r2: GR, adr?: number) {
-        let reg1 = this.grToReg(r1);
-        let reg2 = this.grToReg(r2);
+        const reg1 = this.grToReg(r1);
+        const reg2 = this.grToReg(r2);
 
-        // たぶんADDA命令のようにこの条件分岐は不要
-        // adrの?も不要
-        if (adr == undefined) {
-            reg1.value = reg2.value;
-        } else {
-            reg1.value = this.effectiveAddressContent(reg2, adr);
-        }
+        reg1.value = this.effectiveAddressContent(reg2, adr);
 
         // LD命令はOFを0にする
         this._OF.putdown();
@@ -314,16 +306,16 @@ export class Comet2 {
      */
     private effectiveAddress(reg: Register16bit, adr: number) {
         // GR0は指標レジスタとして使えないので0とする
-        let base = reg.name == "GR0" ? 0 : reg.value;
-        let index = base + adr;
+        const base = reg.name == "GR0" ? 0 : reg.value;
+        const index = base + adr;
         return index;
     }
 
     /**
      * 実効アドレスの内容を返す
      */
-    private effectiveAddressContent(reg: Register16bit, adr: number) {
-        if (adr == 0 || adr == undefined) {
+    private effectiveAddressContent(reg: Register16bit, adr?: number) {
+        if (adr == undefined) {
             return reg.value;
         } else {
             return this._memory.getMemroyValue(this.effectiveAddress(reg, adr));
@@ -339,6 +331,8 @@ export class Comet2 {
         if (r == GR.GR5) return this.GR5;
         if (r == GR.GR6) return this.GR6;
         if (r == GR.GR7) return this.GR7;
+
+        throw new Error();
     }
 }
 

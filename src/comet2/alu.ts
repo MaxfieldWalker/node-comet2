@@ -1,4 +1,6 @@
-import { Outlet } from '../parts/outlet';
+"use strict";
+
+import { Outlet } from "../parts/outlet";
 
 /**
  * ALU
@@ -40,21 +42,23 @@ export class ALU {
         return this._outletMode;
     }
 
-    private updateOutput(){
-        let output = this.calcOutput();
+    private updateOutput() {
+        const output = this.calcOutput();
         this._outletOutput.setValue(output);
     }
 
     private calcOutput() {
-        let a = this._outletInputA.value;
-        let b = this._outletInputB.value;
-        let mode = this._outletMode.value;
+        const a = this._outletInputA.value;
+        const b = this._outletInputB.value;
+        const mode = this._outletMode.value;
 
         if (mode == ALUMode.ADD) return a + b;
         if (mode == ALUMode.SUB) return a - b;
         if (mode == ALUMode.AND) return a & b;
-        if (mode == ALUMode.OR)  return a | b;
+        if (mode == ALUMode.OR) return a | b;
         if (mode == ALUMode.XOR) return a ^ b;
+
+        throw new Error();
     }
 }
 

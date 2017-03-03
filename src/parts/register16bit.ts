@@ -1,4 +1,4 @@
-'use strict'
+"use strict"
 
 /**
  * Register16bit
@@ -34,6 +34,8 @@ export class Register16bit {
     constructor(name: string, isIndexRegister: boolean, value?: number) {
         this._name = name;
         this._isIndexRegister = isIndexRegister;
-        this._value = value;
+        if (value !== undefined) {
+            this._value = value;
+        }
     }
 }

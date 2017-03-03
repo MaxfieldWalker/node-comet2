@@ -1,3 +1,4 @@
+"use strict";
 
 namespace MemoryConst {
     export const MinIndex = 0;
@@ -16,8 +17,8 @@ export class Memory {
     }
 
     public load(memory: Array<number>) {
-        for (var i = 0; i < memory.length; i++) {
-            let value = memory[i];
+        for (let i = 0; i < memory.length; i++) {
+            const value = memory[i];
             this.setMemoryValue(value, i);
         }
     }

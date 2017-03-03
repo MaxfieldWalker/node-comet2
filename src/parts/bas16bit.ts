@@ -1,6 +1,8 @@
-import { Plug } from './plug';
-import { EventEmitter } from '../common/eventEmitter'
-import { ValueChangedEventArgs } from './valueChangedEventArgs';
+"use strict";
+
+import { Plug } from "./plug";
+import { EventEmitter } from "../common/eventEmitter"
+import { ValueChangedEventArgs } from "./valueChangedEventArgs";
 
 /**
  * 16ビットバス

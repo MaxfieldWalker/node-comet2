@@ -1,19 +1,19 @@
-'use strict';
+"use strict";
 
 // hexyを使わないならこのソースは不要
 
-var hexdump = require('hexy');
+const hexdump = require("hexy");
 
 export class HexdumpHelper{
     public static dump(){
-        let format ={
+        const format = {
             numbering: "none",
             annotate: "none",
             format: "twos"
         };
 
-        let buf = new Buffer("abcdefghijklmnopqrstuvwxyz");
-        
+        const buf = new Buffer("abcdefghijklmnopqrstuvwxyz");
+
         console.log(hexdump.hexy(buf, format));
     }
 }

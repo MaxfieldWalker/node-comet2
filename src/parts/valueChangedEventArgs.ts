@@ -1,6 +1,6 @@
-'use strict';
+"use strict";
 
-import { Bas16bit } from './bas16bit';
+import { Bas16bit } from "./bas16bit";
 
 export class ValueChangedEventArgs<T>{
     private _value: T;
@@ -8,7 +8,7 @@ export class ValueChangedEventArgs<T>{
 
     /**
      * @param value 新しい値
-     * @param source 変更元のバス 
+     * @param source 変更元のバス
      */
     constructor(value: T, source: Bas16bit<T>) {
         this._value = value;

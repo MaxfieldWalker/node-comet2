@@ -1,6 +1,8 @@
-import { Bas16bit } from './bas16bit';
-import { ValueChangedEventArgs } from './valueChangedEventArgs';
-import { EventEmitter } from '../common/eventEmitter';
+"use strict";
+
+import { Bas16bit } from "./bas16bit";
+import { ValueChangedEventArgs } from "./valueChangedEventArgs";
+import { EventEmitter } from "../common/eventEmitter";
 
 /**
  * Outlet
@@ -43,7 +45,7 @@ export class Outlet<T> {
     }
 
     public addBas(bas: Bas16bit<T>) {
-        let handler = (args: ValueChangedEventArgs<T>) => {
+        const handler = (args: ValueChangedEventArgs<T>) => {
             this.updateValue(args.value);
 
             // 自分自身でなく変更元でもないものに変更を伝える
@@ -58,8 +60,8 @@ export class Outlet<T> {
     }
 
     public removeBas(bas: Bas16bit<T>) {
-        let elementToRemove = this._bases.filter(x => x[0] == bas)[0];
-        let index = this._bases.indexOf(elementToRemove);
+        const elementToRemove = this._bases.filter(x => x[0] == bas)[0];
+        const index = this._bases.indexOf(elementToRemove);
         this._bases.splice(index, 1);
         bas.onValueChanged.unsubscribe(elementToRemove[1]);
     }
