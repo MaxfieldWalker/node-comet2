@@ -18,65 +18,94 @@ const defaultComet2Option: Comet2Option = {
 export class Comet2 {
 
     private _GR0: Register16bit;
-    public get GR0(): Register16bit {
-        return this._GR0;
+    public get GR0(): number {
+        return this._GR0.value;
     }
 
     private _GR1: Register16bit;
-    public get GR1(): Register16bit {
-        return this._GR1;
+    public get GR1(): number {
+        return this._GR1.value;
     }
 
     private _GR2: Register16bit;
-    public get GR2(): Register16bit {
-        return this._GR2;
+    public get GR2(): number {
+        return this._GR2.value;
     }
 
     private _GR3: Register16bit;
-    public get GR3(): Register16bit {
-        return this._GR3;
+    public get GR3(): number {
+        return this._GR3.value;
     }
 
     private _GR4: Register16bit;
-    public get GR4(): Register16bit {
-        return this._GR4;
+    public get GR4(): number {
+        return this._GR4.value;
     }
 
     private _GR5: Register16bit;
-    public get GR5(): Register16bit {
-        return this._GR5;
+    public get GR5(): number {
+        return this._GR5.value;
     }
 
     private _GR6: Register16bit;
-    public get GR6(): Register16bit {
-        return this._GR6;
+    public get GR6(): number {
+        return this._GR6.value;
     }
 
     private _GR7: Register16bit;
-    public get GR7(): Register16bit {
-        return this._GR7;
+    public get GR7(): number {
+        return this._GR7.value;
+    }
+
+    private _GR8: Register16bit;
+    public get GR8(): number {
+        return this._GR8.value;
     }
 
     private _OF: Flag;
-    public get OF(): Flag {
-        return this._OF;
+    public get OF(): boolean {
+        return this._OF.value;
     }
 
     private _SF: Flag;
-    public get SF(): Flag {
-        return this._SF;
+    public get SF(): boolean {
+        return this._SF.value;
     }
 
     private _ZF: Flag;
-    public get ZF(): Flag {
-        return this._ZF;
+    public get ZF(): boolean {
+        return this._ZF.value;
     }
 
     private _stack: Stack;
     private _memory: Memory;
     private _alu: ALU;
     private _PR: Register16bit;
+    public get PR(): number {
+        return this._PR.value;
+    }
 
+    public get grs() {
+        return {
+            gr0: this.GR0,
+            gr1: this.GR1,
+            gr2: this.GR2,
+            gr3: this.GR3,
+            gr4: this.GR4,
+            gr5: this.GR5,
+            gr6: this.GR6,
+            gr7: this.GR7,
+            gr8: this.GR8
+        };
+    }
+
+    public get flags() {
+        return {
+            of: this.OF,
+            sf: this.SF,
+            zf: this.ZF
+        };
+    }
 
     constructor(private _comet2Option: Comet2Option = defaultComet2Option) {
         this._GR0 = new Register16bit("GR0", false, 0);
@@ -87,6 +116,7 @@ export class Comet2 {
         this._GR5 = new Register16bit("GR5", true, 0);
         this._GR6 = new Register16bit("GR6", true, 0);
         this._GR7 = new Register16bit("GR7", true, 0);
+        this._GR8 = new Register16bit("GR8", true, 0);
 
         this._OF = new Flag("OF");
         this._SF = new Flag("SF");
@@ -179,7 +209,8 @@ export class Comet2 {
      * NOP命令
      */
     nop() {
-        throw new Error("not implemented");
+        // 何もしない
+        this.updatePR();
     }
 
     /**
@@ -426,14 +457,14 @@ export class Comet2 {
     }
 
     private grToReg(r: GR): Register16bit {
-        if (r == GR.GR0) return this.GR0;
-        if (r == GR.GR1) return this.GR1;
-        if (r == GR.GR2) return this.GR2;
-        if (r == GR.GR3) return this.GR3;
-        if (r == GR.GR4) return this.GR4;
-        if (r == GR.GR5) return this.GR5;
-        if (r == GR.GR6) return this.GR6;
-        if (r == GR.GR7) return this.GR7;
+        if (r == GR.GR0) return this._GR0;
+        if (r == GR.GR1) return this._GR1;
+        if (r == GR.GR2) return this._GR2;
+        if (r == GR.GR3) return this._GR3;
+        if (r == GR.GR4) return this._GR4;
+        if (r == GR.GR5) return this._GR5;
+        if (r == GR.GR6) return this._GR6;
+        if (r == GR.GR7) return this._GR7;
 
         throw new Error();
     }
