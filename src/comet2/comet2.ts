@@ -5,6 +5,12 @@ import { Flag } from "../parts/flag";
 import { Stack } from "../parts/stack";
 import { Memory } from "../parts/memory";
 import { ALU, ALUMode } from "./alu";
+import { Comet2Option } from "./option";
+import { dumpTo2ByteArray } from "../util/hexdumpHelper";
+
+const defaultComet2Option: Comet2Option = {
+    useGR8AsSP: false
+};
 
 /**
  * Comet2
@@ -72,7 +78,7 @@ export class Comet2 {
     private _PR: Register16bit;
 
 
-    constructor(memory?: Array<number>) {
+    constructor(private _comet2Option: Comet2Option = defaultComet2Option) {
         this._GR0 = new Register16bit("GR0", false, 0);
         this._GR1 = new Register16bit("GR1", true, 0);
         this._GR2 = new Register16bit("GR2", true, 0);
@@ -85,12 +91,6 @@ export class Comet2 {
         this._OF = new Flag("OF");
         this._SF = new Flag("SF");
         this._ZF = new Flag("ZF");
-
-        this._memory = new Memory();
-        if (memory) {
-            // メモリにプログラムを載せる
-            this._memory.load(memory);
-        }
 
         this._stack = new Stack(this._memory);
         this._alu = new ALU();
@@ -112,7 +112,14 @@ export class Comet2 {
         throw new Error();
     }
 
-    public run() {
+    public run(inputPath: string) {
+        const memory = dumpTo2ByteArray(inputPath);
+        this._memory = new Memory();
+        if (memory) {
+            // メモリにプログラムを載せる
+            this._memory.load(memory);
+        }
+
         const pr = this._PR.value;
         // TODO: .comファイルの先頭にラベル名を含めないならoffsetは不要
         const offset = 8;
@@ -241,7 +248,7 @@ export class Comet2 {
 
         if (inst != 0x81) {
             // TODO: 終了条件を本番用にする
-            this.run();
+            // this.run();
         }
     }
 
