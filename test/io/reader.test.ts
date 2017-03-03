@@ -4,6 +4,6 @@ import { Reader } from "../../src/io/reader";
 
 suite("Reader test", () => {
     test("read", () => {
-        const buf = Reader.read("./src/app.ts");
+        const buf = Reader.read("./package.json");
     })
 });
