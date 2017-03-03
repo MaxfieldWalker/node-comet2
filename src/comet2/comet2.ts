@@ -133,114 +133,73 @@ export class Comet2 {
         const r2 = this.numberToGR(v & 0x000F);
         const address = this._memory.getMemroyValue(pr + 1 + offset);
 
-        // NOP命令
-        if (inst == 0x00) {
+        if (inst == 0x00) this.nop();
 
-        }
-
-        // LD命令(アドレス有り)
-        if (inst == 0x10) {
-
-        }
-        // LD命令(アドレス無し)
-        if (inst == 0x14) {
-
-        }
-
-        // ST命令
-        if (inst == 0x11) {
-
-        }
-
-        // LAD命令
+        if (inst == 0x10 || 0x14) this.ld(r1, r2, address);
+        if (inst == 0x11) this.st(r1, r2);
         if (inst == 0x12) this.lad(r1, r2, address);
-        // ADDA命令(アドレス無し)
-        if (inst == 0x24) this.adda(r1, r2);
-        // ADDA命令(アドレス有り)
-        if (inst == 0x20) this.adda(r1, r2, address);
 
+        if (inst == 0x20 || inst == 0x24) this.adda(r1, r2, address);
+        if (inst == 0x22 || inst == 0x26) this.addl(r1, r2, address);
+        if (inst == 0x21 || inst == 0x25) this.suba(r1, r2, address);
+        if (inst == 0x23 || inst == 0x27) this.subl(r1, r2, address);
+        if (inst == 0x30 || inst == 0x34) this.and(r1, r2, address);
+        if (inst == 0x31 || inst == 0x35) this.or(r1, r2, address);
+        if (inst == 0x32 || inst == 0x36) this.xor(r1, r2, address);
+        if (inst == 0x40 || inst == 0x44) this.cpa(r1, r2, address);
+        if (inst == 0x41 || inst == 0x45) this.cpl(r1, r2, address);
 
-        // ADDL命令(アドレス無し)
-        if (inst == 0x26) {
+        if (inst == 0x50) this.sla(r1, r2, address);
+        if (inst == 0x51) this.sra(r1, r2, address);
+        if (inst == 0x52) this.sll(r1, r2, address);
+        if (inst == 0x53) this.srl(r1, r2, address);
 
-        }
-        // ADDL命令(アドレス有り)
-        if (inst == 0x22) {
+        if (inst == 0x61) this.jmi(r1, r2, address);
+        if (inst == 0x62) this.jnz(r1, r2, address);
+        if (inst == 0x63) this.jze(r1, r2, address);
+        if (inst == 0x64) this.jump(r1, r2, address);
+        if (inst == 0x65) this.jpl(r1, r2, address);
+        if (inst == 0x66) this.jov(r1, r2, address);
 
-        }
+        if (inst == 0x70) this.push(r2, address);
+        if (inst == 0x71) this.pop(r1);
 
-        // SUBA命令(アドレス無し)
-        if (inst == 0x25) {
+        if (inst == 0x80) this.call(r2, address);
+        if (inst == 0x81) this.ret();
 
-        }
-        // SUBA命令(アドレス有り)
-        if (inst == 0x21) {
-
-        }
-
-        // SUBL命令(アドレス無し)
-        if (inst == 0x27) {
-
-        }
-        // SUBL命令(アドレス有り)
-        if (inst == 0x23) {
-
-        }
-
-        // AND命令(アドレス無し)
-        if (inst == 0x34) {
-
-        }
-        // AND命令(アドレス有り)
-        if (inst == 0x30) {
-
-        }
-
-        // OR命令(アドレス無し)
-        if (inst == 0x35) {
-
-        }
-        // OR命令(アドレス有り)
-        if (inst == 0x31) {
-
-        }
-
-        // XOR命令(アドレス無し)
-        if (inst == 0x36) {
-
-        }
-        // XOR命令(アドレス有り)
-        if (inst == 0x32) {
-
-        }
-
-        // CPA命令(アドレス無し)
-        if (inst == 0x44) {
-
-        }
-        // CPA命令(アドレス有り)
-        if (inst == 0x40) {
-
-        }
-
-        // CPL命令(アドレス無し)
-        if (inst == 0x45) {
-
-        }
-        // SUBA命令(アドレス有り)
-        if (inst == 0x41) {
-
-        }
-
-        if (inst != 0x81) {
-            // TODO: 終了条件を本番用にする
-            // this.run();
-        }
+        if (inst == 0xF0) this.svc(r2, address);
     }
 
     private updatePR(adr?: number) {
         const newPR = this._PR.value + (adr === undefined ? 1 : 2);
         this._PR.value = newPR;
+    }
+
+    /**
+     * NOP命令
+     */
+    nop() {
+        throw new Error("not implemented");
+    }
+
+    /**
+     * LD命令
+     */
+    public ld(r1: GR, r2: GR, adr?: number) {
+        const reg1 = this.grToReg(r1);
+        const reg2 = this.grToReg(r2);
+
+        reg1.value = this.effectiveAddressContent(reg2, adr);
+
+        // LD命令はOFを0にする
+        this._OF.putdown();
+    }
+
+    /**
+     * ST命令
+     */
+    st(r1: GR, r2: GR) {
+        throw new Error("not implemented");
     }
 
     /**
@@ -275,6 +234,13 @@ export class Comet2 {
     }
 
     /**
+     * ADDL命令
+     */
+    public addl(r1: GR, r2: GR, adr?: number) {
+        throw new Error("not implemented");
+    }
+
+    /**
      * SUBA命令
      */
     public suba(r1: GR, r2: GR, adr?: number) {
@@ -291,17 +257,152 @@ export class Comet2 {
     }
 
     /**
-     * LD命令
+     * SUBL命令
      */
-    public ld(r1: GR, r2: GR, adr?: number) {
-        const reg1 = this.grToReg(r1);
-        const reg2 = this.grToReg(r2);
-
-        reg1.value = this.effectiveAddressContent(reg2, adr);
-
-        // LD命令はOFを0にする
-        this._OF.putdown();
+    public subl(r1: GR, r2: GR, adr?: number) {
+        throw new Error("not implemented");
     }
+
+    /**
+     * AND命令
+     */
+    public and(r1: GR, r2: GR, adr?: number) {
+        throw new Error("not implemented");
+    }
+
+    /**
+     * OR命令
+     */
+    public or(r1: GR, r2: GR, adr?: number) {
+        throw new Error("not implemented");
+    }
+
+    /**
+     * XOR命令
+     */
+    public xor(r1: GR, r2: GR, adr?: number) {
+        throw new Error("not implemented");
+    }
+
+    /**
+     * CPA命令
+     */
+    public cpa(r1: GR, r2: GR, adr?: number) {
+        throw new Error("not implemented");
+    }
+
+    /**
+     * CPL命令
+     */
+    public cpl(r1: GR, r2: GR, adr?: number) {
+        throw new Error("not implemented");
+    }
+
+    /**
+     * SLA命令
+     */
+    public sla(r1: GR, r2: GR, adr: number) {
+        throw new Error("not implemented");
+    }
+
+    /**
+     * SRA命令
+     */
+    public sra(r1: GR, r2: GR, adr: number) {
+        throw new Error("not implemented");
+    }
+
+    /**
+     * SLL命令
+     */
+    public sll(r1: GR, r2: GR, adr: number) {
+        throw new Error("not implemented");
+    }
+
+    /**
+     * JMI命令
+     */
+    public jmi(r1: GR, r2: GR, adr: number) {
+        throw new Error("not implemented");
+    }
+
+    /**
+     * JNZ命令
+     */
+    public jnz(r1: GR, r2: GR, adr: number) {
+        throw new Error("not implemented");
+    }
+
+    /**
+     * JZE命令
+     */
+    public jze(r1: GR, r2: GR, adr: number) {
+        throw new Error("not implemented");
+    }
+
+    /**
+     * JUMP命令
+     */
+    public jump(r1: GR, r2: GR, adr: number) {
+        throw new Error("not implemented");
+    }
+
+    /**
+     * JPL命令
+     */
+    public jpl(r1: GR, r2: GR, adr: number) {
+        throw new Error("not implemented");
+    }
+
+    /**
+     * JOV命令
+     */
+    public jov(r1: GR, r2: GR, adr: number) {
+        throw new Error("not implemented");
+    }
+
+    /**
+     * SLA命令
+     */
+    public srl(r1: GR, r2: GR, adr: number) {
+        throw new Error("not implemented");
+    }
+
+    /**
+     * PUSH命令
+     */
+    public push(r2: GR, adr: number) {
+        throw new Error("not implemented");
+    }
+
+    /**
+     * POP命令
+     */
+    public pop(r: GR) {
+        throw new Error("not implemented");
+    }
+
+    /**
+     * CALL命令
+     */
+    public call(r2: GR, adr: number) {
+        throw new Error("not implemented");
+    }
+
+    /**
+     * RET命令
+     */
+    public ret() {
+        throw new Error("not implemented");
+    }
+
+    /**
+     * SVC命令
+     */
+    public svc(r2: GR, adr: number) {
+        throw new Error("not implemented");
+    }
+
 
     /**
      * 実効アドレスを求める
