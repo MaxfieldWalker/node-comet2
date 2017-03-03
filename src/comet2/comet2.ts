@@ -123,6 +123,7 @@ export class Comet2 {
         this._ZF = new Flag("ZF");
 
         this._stack = new Stack(this._memory);
+        this._memory = new Memory();
         this._alu = new ALU();
 
         // PRの最初の値は0
@@ -143,12 +144,9 @@ export class Comet2 {
     }
 
     public run(inputPath: string) {
+        // メモリにプログラムを載せる
         const memory = dumpTo2ByteArray(inputPath);
-        this._memory = new Memory();
-        if (memory) {
-            // メモリにプログラムを載せる
-            this._memory.load(memory);
-        }
+        this._memory.load(memory);
 
         const pr = this._PR.value;
         // TODO: .comファイルの先頭にラベル名を含めないならoffsetは不要
@@ -166,7 +164,7 @@ export class Comet2 {
         if (inst == 0x00) this.nop();
 
         if (inst == 0x10 || 0x14) this.ld(r1, r2, address);
-        if (inst == 0x11) this.st(r1, r2);
+        if (inst == 0x11) this.st(r1, r2, address);
         if (inst == 0x12) this.lad(r1, r2, address);
 
         if (inst == 0x20 || inst == 0x24) this.adda(r1, r2, address);
@@ -198,6 +196,8 @@ export class Comet2 {
         if (inst == 0x81) this.ret();
 
         if (inst == 0xF0) this.svc(r2, address);
+
+        this.updatePR(address);
     }
 
     private updatePR(adr?: number) {
@@ -229,8 +229,12 @@ export class Comet2 {
     /**
      * ST命令
      */
-    st(r1: GR, r2: GR) {
-        throw new Error("not implemented");
+    st(r1: GR, adr: number, r2?: GR) {
+        const reg1 = this.grToReg(r1);
+        const reg2 = r2 !== undefined ? this.grToReg(r2) : undefined;
+
+        const effectiveAdr = this.effectiveAddress(adr, reg2);
+        this._memory.setMemoryValue(reg1.value, effectiveAdr);
     }
 
     /**
@@ -240,10 +244,8 @@ export class Comet2 {
         const reg1 = this.grToReg(r1);
         const reg2 = this.grToReg(r2);
 
-        const v2 = this.effectiveAddress(reg2, adr);
+        const v2 = this.effectiveAddress(adr, reg2);
         reg1.value = v2;
-
-        this.updatePR(adr);
     }
 
     /**
@@ -260,8 +262,6 @@ export class Comet2 {
         this._alu.mode.setValue(ALUMode.ADD);
         // ALUから結果を取り出してレジスタに入れる
         reg1.value = this._alu.output.value;
-
-        this.updatePR(adr);
     }
 
     /**
@@ -438,10 +438,13 @@ export class Comet2 {
     /**
      * 実効アドレスを求める
      */
-    private effectiveAddress(reg: Register16bit, adr: number) {
+    private effectiveAddress(adr: number, reg?: Register16bit) {
         // GR0は指標レジスタとして使えないので0とする
-        const base = reg.name == "GR0" ? 0 : reg.value;
-        const index = base + adr;
+        const add = reg
+            ? reg.name == "GR0" ? 0 : reg.value
+            : 0;
+
+        const index = adr + add;
         return index;
     }
 
@@ -452,7 +455,7 @@ export class Comet2 {
         if (adr == undefined) {
             return reg.value;
         } else {
-            return this._memory.getMemroyValue(this.effectiveAddress(reg, adr));
+            return this._memory.getMemroyValue(this.effectiveAddress(adr, reg));
         }
     }
 
@@ -467,6 +470,10 @@ export class Comet2 {
         if (r == GR.GR7) return this._GR7;
 
         throw new Error();
+    }
+
+    getMemoryValue(index: number): number {
+        return this._memory.getMemroyValue(index);
     }
 }
 

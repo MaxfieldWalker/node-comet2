@@ -40,6 +40,19 @@ suite("Comet2 test", () => {
         assert.equal(result, 0x0003);
     });
 
+    test("ST", () => {
+        const comet2 = new Comet2();
+        comet2.lad(GR.GR2, GR.GR0, 0x0002);
+        comet2.st(GR.GR2, 0x0100);
+
+        assert.equal(comet2.getMemoryValue(0x0100), 0x0002);
+
+        comet2.lad(GR.GR3, GR.GR0, 0x0003);
+        comet2.st(GR.GR3, 0x0200, GR.GR2);
+
+        assert.equal(comet2.getMemoryValue(0x0202), 0x0003);
+    });
+
     test("LAD", () => {
         const comet2 = new Comet2();
         comet2.lad(GR.GR1, GR.GR0, 0x0003);
