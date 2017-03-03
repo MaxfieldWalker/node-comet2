@@ -31,14 +31,6 @@ suite("Comet2 test", () => {
         assert.equal(comet2.PR - pr, 1);
     });
 
-    test("LAD", () => {
-        const comet2 = new Comet2();
-        comet2.lad(GR.GR1, GR.GR0, 0x0003);
-
-        const result = comet2.GR1;
-        assert.equal(result, 0x0003);
-    });
-
     test("LD", () => {
         const comet2 = new Comet2();
         comet2.lad(GR.GR2, GR.GR0, 0x0003);
@@ -47,6 +39,15 @@ suite("Comet2 test", () => {
         const result = comet2.GR1;
         assert.equal(result, 0x0003);
     });
+
+    test("LAD", () => {
+        const comet2 = new Comet2();
+        comet2.lad(GR.GR1, GR.GR0, 0x0003);
+
+        const result = comet2.GR1;
+        assert.equal(result, 0x0003);
+    });
+
 
     test("ADDA", () => {
         const comet2 = new Comet2();
