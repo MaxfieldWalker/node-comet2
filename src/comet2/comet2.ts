@@ -425,7 +425,7 @@ export class Comet2 {
      * RET命令
      */
     public ret() {
-        throw new Error("not implemented");
+        this._PR.value = this._stack.pop();
     }
 
     /**
