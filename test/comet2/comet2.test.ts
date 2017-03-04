@@ -26,9 +26,6 @@ suite("Comet2 test", () => {
         assert.equal(comet2.OF, of);
         assert.equal(comet2.SF, sf);
         assert.equal(comet2.ZF, zf);
-
-        // PRは1進む
-        assert.equal(comet2.PR - pr, 1);
     });
 
     test("LD", () => {

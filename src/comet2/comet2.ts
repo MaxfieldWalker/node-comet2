@@ -210,7 +210,6 @@ export class Comet2 {
      */
     nop() {
         // 何もしない
-        this.updatePR();
     }
 
     /**
