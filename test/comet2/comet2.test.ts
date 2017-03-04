@@ -282,4 +282,52 @@ suite("Comet2 test", () => {
             assert.equal(comet2.ZF, false);
         });
     });
+
+    suite("CPA", () => {
+        test("pattern 1", () => {
+            const comet2 = new Comet2();
+            comet2.lad(GR.GR1, GR.GR0, 0x0002);
+            comet2.lad(GR.GR2, GR.GR0, 0x0001);
+            comet2.cpa(GR.GR1, GR.GR2);
+
+            assert.equal(comet2.OF, false);
+            assert.equal(comet2.SF, false);
+            assert.equal(comet2.ZF, false);
+        });
+
+        test("pattern 2", () => {
+            const comet2 = new Comet2();
+            comet2.lad(GR.GR1, GR.GR0, 0x0002);
+            comet2.lad(GR.GR2, GR.GR0, 0x0002);
+            comet2.cpa(GR.GR1, GR.GR2);
+
+            assert.equal(comet2.OF, false);
+            assert.equal(comet2.SF, false);
+            assert.equal(comet2.ZF, true);
+        });
+
+        test("pattern 3", () => {
+            const comet2 = new Comet2();
+            comet2.lad(GR.GR1, GR.GR0, 0x0001);
+            comet2.lad(GR.GR2, GR.GR0, 0x0002);
+            comet2.cpa(GR.GR1, GR.GR2);
+
+            assert.equal(comet2.OF, false);
+            assert.equal(comet2.SF, true);
+            assert.equal(comet2.ZF, false);
+        });
+    });
+
+    suite("CPL", () => {
+        test("logical", () => {
+            const comet2 = new Comet2();
+            comet2.lad(GR.GR1, GR.GR0, 0x8000);
+            comet2.lad(GR.GR2, GR.GR0, 0x7FFF);
+            comet2.cpl(GR.GR1, GR.GR2);
+
+            assert.equal(comet2.OF, false);
+            assert.equal(comet2.SF, false);
+            assert.equal(comet2.ZF, false);
+        });
+    });
 });

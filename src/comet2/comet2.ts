@@ -308,14 +308,14 @@ export class Comet2 {
      * CPA命令
      */
     public cpa(r1: GR, r2: GR, adr?: number) {
-        throw new Error("not implemented");
+        this.compareOperation(false, r1, r2, adr);
     }
 
     /**
      * CPL命令
      */
     public cpl(r1: GR, r2: GR, adr?: number) {
-        throw new Error("not implemented");
+        this.compareOperation(true, r1, r2, adr);
     }
 
     /**
@@ -448,21 +448,38 @@ export class Comet2 {
         }
     }
 
-    private calc(method: (a: number, b: number) => number, r1: GR, r2: GR, adr?: number) {
+    private getGR(r1: GR, r2: GR) {
         const reg1 = this.grToReg(r1);
         const reg2 = this.grToReg(r2);
 
+        return [reg1, reg2];
+    }
+
+    private calc(method: (a: number, b: number) => number, reg1: Register16bit, reg2: Register16bit, adr?: number) {
         const v1 = reg1.value;
         const v2 = this.effectiveAddressContent(reg2, adr);
         const ans = method(v1, v2);
         const r = ans & 0xFFFF;
-        reg1.value = r;
 
         return { v1, v2, ans, r };
     }
 
+    private compareOperation(isLogical: boolean, r1: GR, r2: GR, adr?: number) {
+        const [reg1, reg2] = this.getGR(r1, r2);
+
+        const compare = (a: number, b: number) => isLogical ? a - b : toSigned(a) - toSigned(b);
+        const { v1, v2, ans, r } = this.calc(compare, reg1, reg2, adr);
+
+        // フラグを設定する
+        this._OF.putdown();
+        ans < 0 ? this._SF.raise() : this._SF.putdown();
+        ans == 0 ? this._ZF.raise() : this._ZF.putdown();
+    }
+
     private logicalOperation(method: (a: number, b: number) => number, r1: GR, r2: GR, adr?: number) {
-        const { v1, v2, ans, r } = this.calc(method, r1, r2, adr);
+        const [reg1, reg2] = this.getGR(r1, r2);
+        const { v1, v2, ans, r } = this.calc(method, reg1, reg2, adr);
+        reg1.value = r;
 
         // フラグを設定する
         this._OF.putdown();
@@ -471,7 +488,9 @@ export class Comet2 {
     }
 
     private operation(method: (a: number, b: number) => number, isLogical: boolean, r1: GR, r2: GR, adr?: number) {
-        const { v1, v2, ans, r } = this.calc(method, r1, r2, adr);
+        const [reg1, reg2] = this.getGR(r1, r2);
+        const { v1, v2, ans, r } = this.calc(method, reg1, reg2, adr);
+        reg1.value = r;
 
         const overflow = isLogical
             ? ans.toString(2).length > 16
