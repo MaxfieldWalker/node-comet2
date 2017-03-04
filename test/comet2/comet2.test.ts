@@ -268,4 +268,18 @@ suite("Comet2 test", () => {
             assert.equal(comet2.ZF, false);
         });
     });
+
+    suite("XOR", () => {
+        test("normal", () => {
+            const comet2 = new Comet2();
+            comet2.lad(GR.GR1, GR.GR0, 0b0011);
+            comet2.lad(GR.GR2, GR.GR0, 0b0101);
+            comet2.xor(GR.GR1, GR.GR2);
+
+            assert.equal(comet2.GR1, 0b0110);
+            assert.equal(comet2.OF, false);
+            assert.equal(comet2.SF, false);
+            assert.equal(comet2.ZF, false);
+        });
+    });
 });

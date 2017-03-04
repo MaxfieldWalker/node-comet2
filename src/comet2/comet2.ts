@@ -300,7 +300,8 @@ export class Comet2 {
      * XOR命令
      */
     public xor(r1: GR, r2: GR, adr?: number) {
-        throw new Error("not implemented");
+        const xor = (a: number, b: number) => a ^ b;
+        this.logicalOperation(xor, r1, r2, adr);
     }
 
     /**
