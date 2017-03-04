@@ -415,8 +415,10 @@ export class Comet2 {
     /**
      * CALL命令
      */
-    public call(r2: GR, adr: number) {
-        throw new Error("not implemented");
+    public call(adr: number, r2?: GR) {
+        this._stack.push(this.PR);
+        const v2 = this.effectiveAddress(adr, r2);
+        this._PR.value = v2;
     }
 
     /**

@@ -20,15 +20,13 @@ export class Stack {
     }
 
     public push(value: number) {
-        const newSp = this._sp.value - 1;
-        this._sp.setValue(newSp);
+        const newSp = this.decrementSP();
         this._memory.setMemoryValue(value, newSp);
     }
 
     public pop(): number {
         const oldSp = this._sp.value;
-        const newSp = oldSp + 1;
-        this._sp.setValue(newSp);
+        const newSp = this.incrementSP();
         return this._memory.getMemroyValue(oldSp);
     }
 
@@ -37,5 +35,19 @@ export class Stack {
      */
     public getActiveValue() {
         return this._memory.getMemroyValue(this.SP);
+    }
+
+    public incrementSP() {
+        const newSp = this._sp.value + 1;
+        this._sp.setValue(newSp);
+
+        return newSp;
+    }
+
+    public decrementSP() {
+        const newSp = this._sp.value - 1;
+        this._sp.setValue(newSp);
+
+        return newSp;
     }
 }

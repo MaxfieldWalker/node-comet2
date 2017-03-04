@@ -518,4 +518,17 @@ suite("Comet2 test", () => {
             assert.equal(comet2.GR1, 0x0100);
         });
     });
+
+    suite("CALL", () => {
+        test("normal", () => {
+            const comet2 = new Comet2();
+            const oldSP = comet2.SP;
+            const oldPR = comet2.PR;
+            comet2.call(0x0100);
+
+            assert.equal(comet2.SP, oldSP - 1);
+            assert.equal(comet2.getStackActiveValue(), oldPR);
+            assert.equal(comet2.PR, 0x0100);
+        });
+    });
 });
