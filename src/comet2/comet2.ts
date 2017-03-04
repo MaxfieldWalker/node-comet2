@@ -292,7 +292,8 @@ export class Comet2 {
      * OR命令
      */
     public or(r1: GR, r2: GR, adr?: number) {
-        throw new Error("not implemented");
+        const or = (a: number, b: number) => a | b;
+        this.logicalOperation(or, r1, r2, adr);
     }
 
     /**
