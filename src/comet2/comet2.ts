@@ -384,7 +384,8 @@ export class Comet2 {
      * JOV命令
      */
     public jov(adr: number, r2?: GR) {
-        throw new Error("not implemented");
+        const branchCondition = this.OF;
+        this.branchOperation(branchCondition, adr, r2);
     }
 
     /**

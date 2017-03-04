@@ -465,4 +465,20 @@ suite("Comet2 test", () => {
             assert.equal(comet2.PR, 0x0002);
         });
     });
+
+    suite("JOV", () => {
+        test("branch", () => {
+            const comet2 = new Comet2();
+            comet2.setOF(true);
+            comet2.jov(0x0100);
+            assert.equal(comet2.PR, 0x0100);
+        });
+
+        test("not branch", () => {
+            const comet2 = new Comet2();
+            comet2.setOF(false);
+            comet2.jov(0x0100);
+            assert.equal(comet2.PR, 0x0002);
+        });
+    });
 });
