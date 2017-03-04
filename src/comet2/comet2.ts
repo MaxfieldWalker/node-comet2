@@ -202,7 +202,7 @@ export class Comet2 {
 
         if (inst == 0xF0) this.svc(r2, address);
 
-        if (inst < 0x61) {
+        if (inst < 0x61 || inst == 0x70 || inst == 0x71 || inst == 0xF0) {
             this.updatePR(address);
         }
     }
@@ -431,8 +431,8 @@ export class Comet2 {
     /**
      * SVC命令
      */
-    public svc(r2: GR, adr: number) {
-        throw new Error("not implemented");
+    public svc(adr: number, r2?: GR) {
+        // 用途が無いので何もしない
     }
 
 
