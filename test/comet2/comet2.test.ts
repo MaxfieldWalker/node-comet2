@@ -140,16 +140,56 @@ suite("Comet2 test", () => {
     });
 
 
-    test("SUBA", () => {
-        const comet2 = new Comet2();
-        comet2.lad(GR.GR1, GR.GR0, 0x0003);
-        comet2.lad(GR.GR2, GR.GR0, 0x0002);
-        comet2.suba(GR.GR1, GR.GR2);
+    suite("SUBA", () => {
+        test("normal", () => {
+            const comet2 = new Comet2();
+            comet2.lad(GR.GR1, GR.GR0, 0x0003);
+            comet2.lad(GR.GR2, GR.GR0, 0x0002);
+            comet2.suba(GR.GR1, GR.GR2);
 
-        const result = comet2.GR1;
-        assert.equal(result, 0x0001);
+            assert.equal(comet2.GR1, 0x0001);
+            assert.equal(comet2.OF, false);
+            assert.equal(comet2.SF, false);
+            assert.equal(comet2.ZF, false);
+        });
+        test("over 32767", () => {
+            const comet2 = new Comet2();
+            // 0x4000 - 0xC000 = 0x8000 (-32768)より
+            // OFフラグが立つ
+            comet2.lad(GR.GR1, GR.GR0, 0x4000);
+            comet2.lad(GR.GR2, GR.GR0, 0xC000);
+            comet2.suba(GR.GR1, GR.GR2);
 
-        // TODO: 32767を超えるテストをする(OFフラグが立っているかもチェック)
-        // TODO: -32768を超えるテストをする
+            assert.equal(comet2.GR1, 0x8000);
+            assert.equal(comet2.OF, true);
+            assert.equal(comet2.SF, true);
+            assert.equal(comet2.ZF, false);
+        });
+        test("over -32768", () => {
+            const comet2 = new Comet2();
+            // 0x8000(-32768) - 0x0001 = 0x7FFF (32767)より
+            // OFフラグが立つ
+            comet2.lad(GR.GR1, GR.GR0, 0x8000);
+            comet2.lad(GR.GR2, GR.GR0, 0x0001);
+            comet2.suba(GR.GR1, GR.GR2);
+
+            assert.equal(comet2.GR1, 0x7FFF);
+            assert.equal(comet2.OF, true);
+            assert.equal(comet2.SF, false);
+            assert.equal(comet2.ZF, false);
+        });
+        test("zero flag", () => {
+            const comet2 = new Comet2();
+            // 0xFFFF(-1) - 0xFFFF(-1) = 0x0000より
+            // ZFフラグが立つ
+            comet2.lad(GR.GR1, GR.GR0, 0xFFFF);
+            comet2.lad(GR.GR2, GR.GR0, 0xFFFF);
+            comet2.suba(GR.GR1, GR.GR2);
+
+            assert.equal(comet2.GR1, 0x0000);
+            assert.equal(comet2.OF, false);
+            assert.equal(comet2.SF, false);
+            assert.equal(comet2.ZF, true);
+        });
     });
 });

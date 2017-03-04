@@ -7,7 +7,7 @@ import { Memory } from "../parts/memory";
 import { ALU, ALUMode } from "./alu";
 import { Comet2Option } from "./option";
 import { dumpTo2ByteArray } from "../util/hexdumpHelper";
-import { getMSB } from "../util/bit";
+import { getMSB, toSigned } from "../util/bit";
 
 const defaultComet2Option: Comet2Option = {
     useGR8AsSP: false
@@ -456,7 +456,7 @@ export class Comet2 {
 
         const overflow = isLogical
             ? ans.toString(2).length > 16
-            : getMSB(v1) == getMSB(v2) && getMSB(v1) != getMSB(r);
+            : Math.abs(toSigned(r) - toSigned(v1)) > 32768;
 
         // フラグを設定する
         overflow ? this._OF.raise() : this._OF.putdown();
