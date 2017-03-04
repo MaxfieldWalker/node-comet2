@@ -284,7 +284,8 @@ export class Comet2 {
      * AND命令
      */
     public and(r1: GR, r2: GR, adr?: number) {
-        throw new Error("not implemented");
+        const and = (a: number, b: number) => a & b;
+        this.logicalOperation(and, r1, r2, adr);
     }
 
     /**
@@ -445,7 +446,7 @@ export class Comet2 {
         }
     }
 
-    private operation(method: (a: number, b: number) => number, isLogical: boolean, r1: GR, r2: GR, adr?: number) {
+    private calc(method: (a: number, b: number) => number, r1: GR, r2: GR, adr?: number) {
         const reg1 = this.grToReg(r1);
         const reg2 = this.grToReg(r2);
 
@@ -454,6 +455,21 @@ export class Comet2 {
         const ans = method(v1, v2);
         const r = ans & 0xFFFF;
         reg1.value = r;
+
+        return { v1, v2, ans, r };
+    }
+
+    private logicalOperation(method: (a: number, b: number) => number, r1: GR, r2: GR, adr?: number) {
+        const { v1, v2, ans, r } = this.calc(method, r1, r2, adr);
+
+        // フラグを設定する
+        this._OF.putdown();
+        getMSB(r) == 1 ? this._SF.raise() : this._SF.putdown();
+        r == 0 ? this._ZF.raise() : this._ZF.putdown();
+    }
+
+    private operation(method: (a: number, b: number) => number, isLogical: boolean, r1: GR, r2: GR, adr?: number) {
+        const { v1, v2, ans, r } = this.calc(method, r1, r2, adr);
 
         const overflow = isLogical
             ? ans.toString(2).length > 16

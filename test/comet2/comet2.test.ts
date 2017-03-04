@@ -217,4 +217,29 @@ suite("Comet2 test", () => {
             assert.equal(comet2.ZF, false);
         });
     });
+
+    suite("AND", () => {
+        test("pattern 1", () => {
+            const comet2 = new Comet2();
+            comet2.lad(GR.GR1, GR.GR0, 0b1010);
+            comet2.lad(GR.GR2, GR.GR0, 0b0101);
+            comet2.and(GR.GR1, GR.GR2);
+
+            assert.equal(comet2.GR1, 0b0000);
+            assert.equal(comet2.OF, false);
+            assert.equal(comet2.SF, false);
+            assert.equal(comet2.ZF, true);
+        });
+        test("pattern 2", () => {
+            const comet2 = new Comet2();
+            comet2.lad(GR.GR1, GR.GR0, 0b1010000000000000);
+            comet2.lad(GR.GR2, GR.GR0, 0b1010111111111111);
+            comet2.and(GR.GR1, GR.GR2);
+
+            assert.equal(comet2.GR1, 0b1010000000000000);
+            assert.equal(comet2.OF, false);
+            assert.equal(comet2.SF, true);
+            assert.equal(comet2.ZF, false);
+        });
+    });
 });
