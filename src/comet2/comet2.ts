@@ -252,50 +252,24 @@ export class Comet2 {
      * ADDA命令
      */
     public adda(r1: GR, r2: GR, adr?: number) {
-        const reg1 = this.grToReg(r1);
-        const reg2 = this.grToReg(r2);
-
-        const v1 = reg1.value;
-        const v2 = this.effectiveAddressContent(reg2, adr);
-        const r = (v1 + v2) & 0xFFFF;
-        reg1.value = r;
-
-        const overflow = getMSB(v1) != getMSB(r);
-        // OFフラグを設定する
-        overflow ? this._OF.raise() : this._OF.putdown();
+        const add = (a: number, b: number) => a + b;
+        this.operation(add, false, r1, r2, adr);
     }
 
     /**
      * ADDL命令
      */
     public addl(r1: GR, r2: GR, adr?: number) {
-        const reg1 = this.grToReg(r1);
-        const reg2 = this.grToReg(r2);
-
-        const v1 = reg1.value;
-        const v2 = this.effectiveAddressContent(reg2, adr);
-        const r = (v1 + v2) & 0xFFFF;
-        reg1.value = r;
-
-        const overflow = (v1 + v2).toString(2).length > 16;
-        // OFフラグを設定する
-        overflow ? this._OF.raise() : this._OF.putdown();
+        const add = (a: number, b: number) => a + b;
+        this.operation(add, true, r1, r2, adr);
     }
 
     /**
      * SUBA命令
      */
     public suba(r1: GR, r2: GR, adr?: number) {
-        const reg1 = this.grToReg(r1);
-        const reg2 = this.grToReg(r2);
-
-        this._alu.inputA.setValue(reg1.value);
-        const v2 = this.effectiveAddressContent(reg2, adr);
-        this._alu.inputB.setValue(v2);
-
-        this._alu.mode.setValue(ALUMode.SUB);
-        // ALUから結果を取り出してレジスタに入れる
-        reg1.value = this._alu.output.value;
+        const sub = (a: number, b: number) => a - b;
+        this.operation(sub, false, r1, r2, adr);
     }
 
     /**
@@ -468,6 +442,26 @@ export class Comet2 {
         } else {
             return this._memory.getMemroyValue(this.effectiveAddress(adr, reg));
         }
+    }
+
+    private operation(method: (a: number, b: number) => number, isLogical: boolean, r1: GR, r2: GR, adr?: number) {
+        const reg1 = this.grToReg(r1);
+        const reg2 = this.grToReg(r2);
+
+        const v1 = reg1.value;
+        const v2 = this.effectiveAddressContent(reg2, adr);
+        const ans = method(v1, v2);
+        const r = ans & 0xFFFF;
+        reg1.value = r;
+
+        const overflow = isLogical
+            ? ans.toString(2).length > 16
+            : getMSB(v1) == getMSB(v2) && getMSB(v1) != getMSB(r);
+
+        // フラグを設定する
+        overflow ? this._OF.raise() : this._OF.putdown();
+        getMSB(r) == 1 ? this._SF.raise() : this._SF.putdown();
+        r == 0 ? this._ZF.raise() : this._ZF.putdown();
     }
 
     private grToReg(r: GR): Register16bit {
