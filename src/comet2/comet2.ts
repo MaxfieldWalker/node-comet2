@@ -86,6 +86,10 @@ export class Comet2 {
         return this._PR.value;
     }
 
+    public get SP(): number {
+        return this._stack.SP;
+    }
+
     public get grs() {
         return {
             gr0: this.GR0,
@@ -123,8 +127,8 @@ export class Comet2 {
         this._SF = new Flag("SF");
         this._ZF = new Flag("ZF");
 
-        this._stack = new Stack(this._memory);
         this._memory = new Memory();
+        this._stack = new Stack(this._memory);
         this._alu = new ALU();
 
         // PRの最初の値は0
@@ -396,8 +400,9 @@ export class Comet2 {
     /**
      * PUSH命令
      */
-    public push(r2: GR, adr: number) {
-        throw new Error("not implemented");
+    public push(adr: number, r2?: GR) {
+        const v2 = this.effectiveAddress(adr, r2);
+        this._stack.push(v2);
     }
 
     /**
@@ -561,6 +566,10 @@ export class Comet2 {
 
     setZF(v: boolean) {
         this._ZF.set(v);
+    }
+
+    getStackActiveValue() {
+        return this._stack.getActiveValue();
     }
 }
 

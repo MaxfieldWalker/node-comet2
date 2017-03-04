@@ -492,4 +492,16 @@ suite("Comet2 test", () => {
             assert.equal(comet2.PR, 0x0100);
         });
     });
+
+    suite("PUSH", () => {
+        test("normal", () => {
+            const comet2 = new Comet2();
+            const oldSP = comet2.SP;
+            comet2.push(0x0100);
+
+            const newSP = comet2.SP;
+            assert.equal(newSP, oldSP - 1);
+            assert.equal(comet2.getStackActiveValue(), 0x0100);
+        });
+    });
 });

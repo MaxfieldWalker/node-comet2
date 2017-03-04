@@ -16,7 +16,7 @@ export class Stack {
     }
 
     public get SP() {
-        return this._sp;
+        return this._sp.value;
     }
 
     public push(value: number) {
@@ -30,5 +30,12 @@ export class Stack {
         const newSp = oldSp + 1;
         this._sp.setValue(newSp);
         return this._memory.getMemroyValue(oldSp);
+    }
+
+    /**
+     * SPの指す値を返します
+     */
+    public getActiveValue() {
+        return this._memory.getMemroyValue(this.SP);
     }
 }
