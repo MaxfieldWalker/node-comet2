@@ -6,7 +6,8 @@ import { Stack } from "../parts/stack";
 import { Memory } from "../parts/memory";
 import { Comet2Option } from "./option";
 import { dumpTo2ByteArray } from "../util/hexdumpHelper";
-import { getMSB, toSigned, ShiftFunc, sla, sll, sra, srl } from "../util/bit";
+import { getMSB, toSigned } from "../util/bit";
+import { add, sub, and, or, xor, sla, sll, sra, srl, ShiftFunc } from "./calc";
 
 const defaultComet2Option: Comet2Option = {
     useGR8AsSP: false
@@ -248,103 +249,25 @@ export class Comet2 {
         reg1.value = v2;
     }
 
-    /**
-     * ADDA命令
-     */
-    public adda(r1: GR, r2: GR, adr?: number) {
-        const add = (a: number, b: number) => a + b;
-        this.operation(add, false, r1, r2, adr);
-    }
 
-    /**
-     * ADDL命令
-     */
-    public addl(r1: GR, r2: GR, adr?: number) {
-        const add = (a: number, b: number) => a + b;
-        this.operation(add, true, r1, r2, adr);
-    }
+    adda = (r1: GR, r2: GR, adr?: number) => this.operation(add, false, r1, r2, adr);
+    addl = (r1: GR, r2: GR, adr?: number) => this.operation(add, true, r1, r2, adr);
 
-    /**
-     * SUBA命令
-     */
-    public suba(r1: GR, r2: GR, adr?: number) {
-        const sub = (a: number, b: number) => a - b;
-        this.operation(sub, false, r1, r2, adr);
-    }
+    suba = (r1: GR, r2: GR, adr?: number) => this.operation(sub, false, r1, r2, adr);
+    subl = (r1: GR, r2: GR, adr?: number) => this.operation(sub, true, r1, r2, adr);
 
-    /**
-     * SUBL命令
-     */
-    public subl(r1: GR, r2: GR, adr?: number) {
-        const sub = (a: number, b: number) => a - b;
-        this.operation(sub, true, r1, r2, adr);
-    }
+    and = (r1: GR, r2: GR, adr?: number) => this.logicalOperation(and, r1, r2, adr);
+    or = (r1: GR, r2: GR, adr?: number) => this.logicalOperation(or, r1, r2, adr);
+    xor = (r1: GR, r2: GR, adr?: number) => this.logicalOperation(xor, r1, r2, adr);
 
-    /**
-     * AND命令
-     */
-    public and(r1: GR, r2: GR, adr?: number) {
-        const and = (a: number, b: number) => a & b;
-        this.logicalOperation(and, r1, r2, adr);
-    }
+    cpa = (r1: GR, r2: GR, adr?: number) => this.compareOperation(false, r1, r2, adr);
+    cpl = (r1: GR, r2: GR, adr?: number) => this.compareOperation(true, r1, r2, adr);
 
-    /**
-     * OR命令
-     */
-    public or(r1: GR, r2: GR, adr?: number) {
-        const or = (a: number, b: number) => a | b;
-        this.logicalOperation(or, r1, r2, adr);
-    }
+    sla = (r1: GR, adr: number, r2?: GR) => this.shiftOperation(sla, r1, adr, r2);
+    sra = (r1: GR, adr: number, r2?: GR) => this.shiftOperation(sra, r1, adr, r2);
+    sll = (r1: GR, adr: number, r2?: GR) => this.shiftOperation(sll, r1, adr, r2);
+    srl = (r1: GR, adr: number, r2?: GR) => this.shiftOperation(srl, r1, adr, r2);
 
-    /**
-     * XOR命令
-     */
-    public xor(r1: GR, r2: GR, adr?: number) {
-        const xor = (a: number, b: number) => a ^ b;
-        this.logicalOperation(xor, r1, r2, adr);
-    }
-
-    /**
-     * CPA命令
-     */
-    public cpa(r1: GR, r2: GR, adr?: number) {
-        this.compareOperation(false, r1, r2, adr);
-    }
-
-    /**
-     * CPL命令
-     */
-    public cpl(r1: GR, r2: GR, adr?: number) {
-        this.compareOperation(true, r1, r2, adr);
-    }
-
-    /**
-     * SLA命令
-     */
-    public sla(r1: GR, adr: number, r2?: GR) {
-        this.shiftOperation(sla, r1, adr, r2);
-    }
-
-    /**
-     * SRA命令
-     */
-    public sra(r1: GR, adr: number, r2?: GR) {
-        this.shiftOperation(sra, r1, adr, r2);
-    }
-
-    /**
-     * SLL命令
-     */
-    public sll(r1: GR, adr: number, r2?: GR) {
-        this.shiftOperation(sll, r1, adr, r2);
-    }
-
-    /**
-     * SRL命令
-     */
-    public srl(r1: GR, adr: number, r2?: GR) {
-        this.shiftOperation(srl, r1, adr, r2);
-    }
 
     /**
      * JPL命令
