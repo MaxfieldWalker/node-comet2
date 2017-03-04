@@ -360,7 +360,8 @@ export class Comet2 {
      * JMI命令
      */
     public jmi(adr: number, r2?: GR) {
-        throw new Error("not implemented");
+        const branchCondition = this.SF;
+        this.branchOperation(branchCondition, adr, r2);
     }
 
     /**
