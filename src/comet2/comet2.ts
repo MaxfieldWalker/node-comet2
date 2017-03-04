@@ -220,9 +220,8 @@ export class Comet2 {
      */
     public ld(r1: GR, r2: GR, adr?: number) {
         const reg1 = this.grToReg(r1);
-        const reg2 = this.grToReg(r2);
 
-        reg1.value = this.effectiveAddressContent(reg2, adr);
+        reg1.value = this.effectiveAddressContent(r2, adr);
 
         // LD命令はOFを0にする
         this._OF.putdown();
@@ -233,9 +232,8 @@ export class Comet2 {
      */
     st(r1: GR, adr: number, r2?: GR) {
         const reg1 = this.grToReg(r1);
-        const reg2 = r2 !== undefined ? this.grToReg(r2) : undefined;
 
-        const effectiveAdr = this.effectiveAddress(adr, reg2);
+        const effectiveAdr = this.effectiveAddress(adr, r2);
         this._memory.setMemoryValue(reg1.value, effectiveAdr);
     }
 
@@ -244,9 +242,8 @@ export class Comet2 {
      */
     public lad(r1: GR, r2: GR, adr: number) {
         const reg1 = this.grToReg(r1);
-        const reg2 = this.grToReg(r2);
 
-        const v2 = this.effectiveAddress(adr, reg2);
+        const v2 = this.effectiveAddress(adr, r2);
         reg1.value = v2;
     }
 
@@ -435,10 +432,10 @@ export class Comet2 {
     /**
      * 実効アドレスを求める
      */
-    private effectiveAddress(adr: number, reg?: Register16bit) {
+    private effectiveAddress(adr: number, gr?: GR) {
         // GR0は指標レジスタとして使えないので0とする
-        const add = reg
-            ? reg.name == "GR0" ? 0 : reg.value
+        const add = gr !== undefined
+            ? gr == GR.GR0 ? 0 : this.grToReg(gr).value
             : 0;
 
         const index = adr + add;
@@ -448,24 +445,17 @@ export class Comet2 {
     /**
      * 実効アドレスの内容を返す
      */
-    private effectiveAddressContent(reg: Register16bit, adr?: number) {
+    private effectiveAddressContent(gr: GR, adr?: number) {
         if (adr == undefined) {
-            return reg.value;
+            return this.grToReg(gr).value;
         } else {
-            return this._memory.getMemroyValue(this.effectiveAddress(adr, reg));
+            return this._memory.getMemroyValue(this.effectiveAddress(adr, gr));
         }
     }
 
-    private getGR(r1: GR, r2: GR) {
-        const reg1 = this.grToReg(r1);
-        const reg2 = this.grToReg(r2);
-
-        return [reg1, reg2];
-    }
-
-    private calc(method: (a: number, b: number) => number, reg1: Register16bit, reg2: Register16bit, adr?: number) {
-        const v1 = reg1.value;
-        const v2 = this.effectiveAddressContent(reg2, adr);
+    private calc(method: (a: number, b: number) => number, r1: GR, r2: GR, adr?: number) {
+        const v1 = this.grToReg(r1).value;
+        const v2 = this.effectiveAddressContent(r2, adr);
         const ans = method(v1, v2);
         const r = ans & 0xFFFF;
 
@@ -473,10 +463,8 @@ export class Comet2 {
     }
 
     private compareOperation(isLogical: boolean, r1: GR, r2: GR, adr?: number) {
-        const [reg1, reg2] = this.getGR(r1, r2);
-
         const compare = (a: number, b: number) => isLogical ? a - b : toSigned(a) - toSigned(b);
-        const { ans } = this.calc(compare, reg1, reg2, adr);
+        const { ans } = this.calc(compare, r1, r2, adr);
 
         // フラグを設定する
         this.setFR(
@@ -487,9 +475,8 @@ export class Comet2 {
     }
 
     private logicalOperation(method: (a: number, b: number) => number, r1: GR, r2: GR, adr?: number) {
-        const [reg1, reg2] = this.getGR(r1, r2);
-        const { r } = this.calc(method, reg1, reg2, adr);
-        reg1.value = r;
+        const { r } = this.calc(method, r1, r2, adr);
+        this.grToReg(r1).value = r;
 
         // フラグを設定する
         this.setFR(
@@ -500,9 +487,8 @@ export class Comet2 {
     }
 
     private operation(method: (a: number, b: number) => number, isLogical: boolean, r1: GR, r2: GR, adr?: number) {
-        const [reg1, reg2] = this.getGR(r1, r2);
-        const { v1, ans, r } = this.calc(method, reg1, reg2, adr);
-        reg1.value = r;
+        const { v1, ans, r } = this.calc(method, r1, r2, adr);
+        this.grToReg(r1).value = r;
 
         const overflow = isLogical
             ? ans.toString(2).length > 16
@@ -518,10 +504,9 @@ export class Comet2 {
 
     private shiftOperation(method: ShiftFunc, r1: GR, adr: number, r2?: GR) {
         const reg1 = this.grToReg(r1);
-        const reg2 = r2 !== undefined ? this.grToReg(r2) : undefined;
 
         const v1 = reg1.value;
-        const v2 = this.effectiveAddress(adr, reg2);
+        const v2 = this.effectiveAddress(adr, r2);
         const { ans, lastExpelledBit } = method(v1, v2);
         const r = ans & 0xFFFF;
 
@@ -536,8 +521,7 @@ export class Comet2 {
 
     private branchOperation(branchCondition: boolean, adr: number, r2?: GR) {
         if (branchCondition) {
-            const reg2 = r2 !== undefined ? this.grToReg(r2) : undefined;
-            const v2 = this.effectiveAddress(adr, reg2);
+            const v2 = this.effectiveAddress(adr, r2);
             this._PR.value = v2;
         } else {
             this._PR.value = this.PR + 2;
