@@ -368,7 +368,8 @@ export class Comet2 {
      * JNZ命令
      */
     public jnz(adr: number, r2?: GR) {
-        throw new Error("not implemented");
+        const branchCondition = !this.ZF;
+        this.branchOperation(branchCondition, adr, r2);
     }
 
     /**
