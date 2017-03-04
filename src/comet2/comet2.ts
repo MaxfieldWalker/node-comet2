@@ -468,28 +468,32 @@ export class Comet2 {
         const [reg1, reg2] = this.getGR(r1, r2);
 
         const compare = (a: number, b: number) => isLogical ? a - b : toSigned(a) - toSigned(b);
-        const { v1, v2, ans, r } = this.calc(compare, reg1, reg2, adr);
+        const { ans } = this.calc(compare, reg1, reg2, adr);
 
         // フラグを設定する
-        this._OF.putdown();
-        ans < 0 ? this._SF.raise() : this._SF.putdown();
-        ans == 0 ? this._ZF.raise() : this._ZF.putdown();
+        this.setFR(
+            false,
+            ans < 0,
+            ans == 0
+        );
     }
 
     private logicalOperation(method: (a: number, b: number) => number, r1: GR, r2: GR, adr?: number) {
         const [reg1, reg2] = this.getGR(r1, r2);
-        const { v1, v2, ans, r } = this.calc(method, reg1, reg2, adr);
+        const { r } = this.calc(method, reg1, reg2, adr);
         reg1.value = r;
 
         // フラグを設定する
-        this._OF.putdown();
-        getMSB(r) == 1 ? this._SF.raise() : this._SF.putdown();
-        r == 0 ? this._ZF.raise() : this._ZF.putdown();
+        this.setFR(
+            false,
+            getMSB(r) == 1,
+            r == 0
+        );
     }
 
     private operation(method: (a: number, b: number) => number, isLogical: boolean, r1: GR, r2: GR, adr?: number) {
         const [reg1, reg2] = this.getGR(r1, r2);
-        const { v1, v2, ans, r } = this.calc(method, reg1, reg2, adr);
+        const { v1, ans, r } = this.calc(method, reg1, reg2, adr);
         reg1.value = r;
 
         const overflow = isLogical
@@ -497,9 +501,11 @@ export class Comet2 {
             : Math.abs(toSigned(r) - toSigned(v1)) > 32768;
 
         // フラグを設定する
-        overflow ? this._OF.raise() : this._OF.putdown();
-        getMSB(r) == 1 ? this._SF.raise() : this._SF.putdown();
-        r == 0 ? this._ZF.raise() : this._ZF.putdown();
+        this.setFR(
+            overflow,
+            getMSB(r) == 1,
+            r == 0
+        );
     }
 
     private shiftOperation(method: ShiftFunc, r1: GR, adr: number, r2?: GR) {
@@ -514,9 +520,16 @@ export class Comet2 {
         reg1.value = r;
 
         // フラグを設定する
-        lastExpelledBit == 1 ? this._OF.raise() : this._OF.putdown();
-        getMSB(r) == 1 ? this._SF.raise() : this._SF.putdown();
-        r == 0 ? this._ZF.raise() : this._ZF.putdown();
+        this.setFR(
+            lastExpelledBit == 1,
+            getMSB(r) == 1,
+            r == 0);
+    }
+
+    private setFR(ofCond: boolean, sfCond: boolean, zfCond: boolean) {
+        ofCond ? this._OF.raise() : this._OF.putdown();
+        sfCond ? this._SF.raise() : this._SF.putdown();
+        zfCond ? this._ZF.raise() : this._ZF.putdown();
     }
 
     private grToReg(r: GR): Register16bit {
