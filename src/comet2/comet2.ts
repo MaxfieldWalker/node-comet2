@@ -409,7 +409,7 @@ export class Comet2 {
      * POP命令
      */
     public pop(r: GR) {
-        throw new Error("not implemented");
+        this.grToReg(r).value = this._stack.pop();
     }
 
     /**
