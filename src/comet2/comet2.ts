@@ -183,12 +183,12 @@ export class Comet2 {
         if (inst == 0x52) this.sll(r1, r2, address);
         if (inst == 0x53) this.srl(r1, r2, address);
 
-        if (inst == 0x61) this.jmi(r1, r2, address);
-        if (inst == 0x62) this.jnz(r1, r2, address);
-        if (inst == 0x63) this.jze(r1, r2, address);
-        if (inst == 0x64) this.jump(r1, r2, address);
-        if (inst == 0x65) this.jpl(r1, r2, address);
-        if (inst == 0x66) this.jov(r1, r2, address);
+        if (inst == 0x61) this.jmi(address, r2);
+        if (inst == 0x62) this.jnz(address, r2);
+        if (inst == 0x63) this.jze(address, r2);
+        if (inst == 0x64) this.jump(address, r2);
+        if (inst == 0x65) this.jpl(address, r2);
+        if (inst == 0x66) this.jov(address, r2);
 
         if (inst == 0x70) this.push(r2, address);
         if (inst == 0x71) this.pop(r1);
@@ -198,7 +198,9 @@ export class Comet2 {
 
         if (inst == 0xF0) this.svc(r2, address);
 
-        this.updatePR(address);
+        if (inst < 0x61) {
+            this.updatePR(address);
+        }
     }
 
     private updatePR(adr?: number) {
@@ -347,44 +349,45 @@ export class Comet2 {
     }
 
     /**
+     * JPL命令
+     */
+    public jpl(adr: number, r2?: GR) {
+        const branchCondition = !this.SF && !this.ZF;
+        this.branchOperation(branchCondition, adr, r2);
+    }
+
+    /**
      * JMI命令
      */
-    public jmi(r1: GR, r2: GR, adr: number) {
+    public jmi(adr: number, r2?: GR) {
         throw new Error("not implemented");
     }
 
     /**
      * JNZ命令
      */
-    public jnz(r1: GR, r2: GR, adr: number) {
+    public jnz(adr: number, r2?: GR) {
         throw new Error("not implemented");
     }
 
     /**
      * JZE命令
      */
-    public jze(r1: GR, r2: GR, adr: number) {
-        throw new Error("not implemented");
-    }
-
-    /**
-     * JUMP命令
-     */
-    public jump(r1: GR, r2: GR, adr: number) {
-        throw new Error("not implemented");
-    }
-
-    /**
-     * JPL命令
-     */
-    public jpl(r1: GR, r2: GR, adr: number) {
+    public jze(adr: number, r2?: GR) {
         throw new Error("not implemented");
     }
 
     /**
      * JOV命令
      */
-    public jov(r1: GR, r2: GR, adr: number) {
+    public jov(adr: number, r2?: GR) {
+        throw new Error("not implemented");
+    }
+
+    /**
+     * JUMP命令
+     */
+    public jump(adr: number, r2?: GR) {
         throw new Error("not implemented");
     }
 
@@ -526,6 +529,16 @@ export class Comet2 {
             r == 0);
     }
 
+    private branchOperation(branchCondition: boolean, adr: number, r2?: GR) {
+        if (branchCondition) {
+            const reg2 = r2 !== undefined ? this.grToReg(r2) : undefined;
+            const v2 = this.effectiveAddress(adr, reg2);
+            this._PR.value = v2;
+        } else {
+            this._PR.value = this.PR + 2;
+        }
+    }
+
     private setFR(ofCond: boolean, sfCond: boolean, zfCond: boolean) {
         ofCond ? this._OF.raise() : this._OF.putdown();
         sfCond ? this._SF.raise() : this._SF.putdown();
@@ -547,6 +560,18 @@ export class Comet2 {
 
     getMemoryValue(index: number): number {
         return this._memory.getMemroyValue(index);
+    }
+
+    setOF(v: boolean) {
+        this._OF.set(v);
+    }
+
+    setSF(v: boolean) {
+        this._SF.set(v);
+    }
+
+    setZF(v: boolean) {
+        this._ZF.set(v);
     }
 }
 

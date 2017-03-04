@@ -399,4 +399,22 @@ suite("Comet2 test", () => {
             assert.equal(comet2.ZF, false);
         });
     });
+
+    suite("JPL", () => {
+        test("branch", () => {
+            const comet2 = new Comet2();
+            comet2.setSF(false);
+            comet2.setZF(false);
+            comet2.jpl(0x0100);
+            assert.equal(comet2.PR, 0x0100);
+        });
+
+        test("not branch", () => {
+            const comet2 = new Comet2();
+            comet2.setSF(true);
+            comet2.setZF(false);
+            comet2.jpl(0x0100);
+            assert.equal(comet2.PR, 0x0002);
+        });
+    });
 });

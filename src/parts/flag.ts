@@ -34,4 +34,12 @@ export class Flag {
     public putdown() {
         this._value = false;
     }
+
+    /**
+     * フラグをセットする
+     * @param v flag value
+     */
+    set(v: boolean) {
+        this._value = v;
+    }
 }
