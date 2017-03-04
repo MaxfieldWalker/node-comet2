@@ -376,7 +376,8 @@ export class Comet2 {
      * JZE命令
      */
     public jze(adr: number, r2?: GR) {
-        throw new Error("not implemented");
+        const branchCondition = this.ZF;
+        this.branchOperation(branchCondition, adr, r2);
     }
 
     /**
