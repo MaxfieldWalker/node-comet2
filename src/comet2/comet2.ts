@@ -276,7 +276,8 @@ export class Comet2 {
      * SUBL命令
      */
     public subl(r1: GR, r2: GR, adr?: number) {
-        throw new Error("not implemented");
+        const sub = (a: number, b: number) => a - b;
+        this.operation(sub, true, r1, r2, adr);
     }
 
     /**

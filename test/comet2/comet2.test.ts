@@ -192,4 +192,29 @@ suite("Comet2 test", () => {
             assert.equal(comet2.ZF, true);
         });
     });
+
+    suite("SUBL", () => {
+        test("normal", () => {
+            const comet2 = new Comet2();
+            comet2.lad(GR.GR1, GR.GR0, 0x0002);
+            comet2.lad(GR.GR2, GR.GR0, 0x0003);
+            comet2.subl(GR.GR1, GR.GR2);
+
+            assert.equal(comet2.GR1, 0xFFFF);
+            assert.equal(comet2.OF, false);
+            assert.equal(comet2.SF, true);
+            assert.equal(comet2.ZF, false);
+        });
+        test("logical", () => {
+            const comet2 = new Comet2();
+            comet2.lad(GR.GR1, GR.GR0, 0x8000);
+            comet2.lad(GR.GR2, GR.GR0, 0x0001);
+            comet2.subl(GR.GR1, GR.GR2);
+
+            assert.equal(comet2.GR1, 0x7FFF);
+            assert.equal(comet2.OF, false);
+            assert.equal(comet2.SF, false);
+            assert.equal(comet2.ZF, false);
+        });
+    });
 });
