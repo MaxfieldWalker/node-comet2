@@ -7,6 +7,7 @@ import { Memory } from "../parts/memory";
 import { ALU, ALUMode } from "./alu";
 import { Comet2Option } from "./option";
 import { dumpTo2ByteArray } from "../util/hexdumpHelper";
+import { getMSB } from "../util/bit";
 
 const defaultComet2Option: Comet2Option = {
     useGR8AsSP: false
@@ -254,20 +255,31 @@ export class Comet2 {
         const reg1 = this.grToReg(r1);
         const reg2 = this.grToReg(r2);
 
-        this._alu.inputA.setValue(reg1.value);
+        const v1 = reg1.value;
         const v2 = this.effectiveAddressContent(reg2, adr);
-        this._alu.inputB.setValue(v2);
+        const r = (v1 + v2) & 0xFFFF;
+        reg1.value = r;
 
-        this._alu.mode.setValue(ALUMode.ADD);
-        // ALUから結果を取り出してレジスタに入れる
-        reg1.value = this._alu.output.value;
+        const overflow = getMSB(v1) != getMSB(r);
+        // OFフラグを設定する
+        overflow ? this._OF.raise() : this._OF.putdown();
     }
 
     /**
      * ADDL命令
      */
     public addl(r1: GR, r2: GR, adr?: number) {
-        throw new Error("not implemented");
+        const reg1 = this.grToReg(r1);
+        const reg2 = this.grToReg(r2);
+
+        const v1 = reg1.value;
+        const v2 = this.effectiveAddressContent(reg2, adr);
+        const r = (v1 + v2) & 0xFFFF;
+        reg1.value = r;
+
+        const overflow = (v1 + v2).toString(2).length > 16;
+        // OFフラグを設定する
+        overflow ? this._OF.raise() : this._OF.putdown();
     }
 
     /**
