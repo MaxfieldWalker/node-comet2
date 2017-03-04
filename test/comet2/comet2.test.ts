@@ -481,4 +481,15 @@ suite("Comet2 test", () => {
             assert.equal(comet2.PR, 0x0002);
         });
     });
+
+    suite("JUMP", () => {
+        test("branch", () => {
+            const comet2 = new Comet2();
+            comet2.setOF(false);
+            comet2.setSF(false);
+            comet2.setZF(false);
+            comet2.jump(0x0100);
+            assert.equal(comet2.PR, 0x0100);
+        });
+    });
 });

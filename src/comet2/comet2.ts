@@ -392,7 +392,8 @@ export class Comet2 {
      * JUMP命令
      */
     public jump(adr: number, r2?: GR) {
-        throw new Error("not implemented");
+        const branchCondition = true;
+        this.branchOperation(branchCondition, adr, r2);
     }
 
     /**
