@@ -4,7 +4,6 @@ import { Register16bit } from "../parts/register16bit";
 import { Flag } from "../parts/flag";
 import { Stack } from "../parts/stack";
 import { Memory } from "../parts/memory";
-import { ALU, ALUMode } from "./alu";
 import { Comet2Option } from "./option";
 import { dumpTo2ByteArray } from "../util/hexdumpHelper";
 import { getMSB, toSigned, ShiftFunc, sla, sll, sra, srl } from "../util/bit";
@@ -80,7 +79,6 @@ export class Comet2 {
 
     private _stack: Stack;
     private _memory: Memory;
-    private _alu: ALU;
     private _PR: Register16bit;
     public get PR(): number {
         return this._PR.value;
@@ -129,7 +127,6 @@ export class Comet2 {
 
         this._memory = new Memory();
         this._stack = new Stack(this._memory);
-        this._alu = new ALU();
 
         // PRの最初の値は0
         this._PR = new Register16bit("PR", false, 0);

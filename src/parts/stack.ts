@@ -1,22 +1,19 @@
 "use strict";
 
 import { Memory } from "./memory";
-import { Outlet } from "./outlet";
 
 export class Stack {
     private _memory: Memory;
-    private _sp: Outlet<number>;
+    private _sp: number;
 
     constructor(memory: Memory) {
         this._memory = memory;
-        this._sp = new Outlet<number>();
-
         // 初期のSPの位置
-        this._sp.setValue(0xffff);
+        this._sp = 0xffff;
     }
 
     public get SP() {
-        return this._sp.value;
+        return this._sp;
     }
 
     public push(value: number) {
@@ -25,7 +22,7 @@ export class Stack {
     }
 
     public pop(): number {
-        const oldSp = this._sp.value;
+        const oldSp = this._sp;
         const newSp = this.incrementSP();
         return this._memory.getMemroyValue(oldSp);
     }
@@ -38,15 +35,15 @@ export class Stack {
     }
 
     public incrementSP() {
-        const newSp = this._sp.value + 1;
-        this._sp.setValue(newSp);
+        const newSp = this._sp + 1;
+        this._sp = newSp;
 
         return newSp;
     }
 
     public decrementSP() {
-        const newSp = this._sp.value - 1;
-        this._sp.setValue(newSp);
+        const newSp = this._sp - 1;
+        this._sp = newSp;
 
         return newSp;
     }
