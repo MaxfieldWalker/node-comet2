@@ -510,13 +510,13 @@ suite("Comet2 test", () => {
         });
     });
 
-    test("JOV", () => {
+    test("SVC", () => {
         const comet2 = new Comet2();
         const { gr0, gr1, gr2, gr3, gr4, gr5, gr6, gr7, gr8 } = comet2.grs;
         const { of, sf, zf } = comet2.flags;
         const pr = comet2.PR;
 
-        comet2.jov(0x0100);
+        comet2.svc(0x0100);
 
         // 何も変化していないか?
         assert.equal(comet2.GR0, gr0);
