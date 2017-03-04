@@ -155,14 +155,14 @@ export class Comet2 {
         // TODO: .comファイルの先頭にラベル名を含めないならoffsetは不要
         const offset = 8;
         // PRの位置にある命令を取得
-        const v = this._memory.getMemroyValue(pr + offset);
+        const v = this._memory.getMemroyValue(offset + pr);
         // 上二桁が命令である
         const inst = (v & 0xFF00) >> 8;
         // r1は3桁目にある
         const r1 = this.numberToGR((v & 0x00F0) >> 4);
         // r2は4桁目にある
         const r2 = this.numberToGR(v & 0x000F);
-        const address = this._memory.getMemroyValue(pr + 1 + offset);
+        const address = this._memory.getMemroyValue(offset + pr + 1);
 
         if (inst == 0x00) this.nop();
 
@@ -222,8 +222,11 @@ export class Comet2 {
      */
     public ld(r1: GR, r2: GR, adr?: number) {
         const reg1 = this.grToReg(r1);
+        const v = adr === undefined
+            ? this.grToReg(r2).value
+            : this.effectiveAddressContent(adr, r2);
 
-        reg1.value = this.effectiveAddressContent(r2, adr);
+        reg1.value = v;
 
         // LD命令はOFを0にする
         this._OF.putdown();
@@ -359,10 +362,10 @@ export class Comet2 {
     /**
      * 実効アドレスを求める
      */
-    private effectiveAddress(adr: number, gr?: GR) {
+    private effectiveAddress(adr: number, r2?: GR) {
         // GR0は指標レジスタとして使えないので0とする
-        const add = gr !== undefined
-            ? gr == GR.GR0 ? 0 : this.grToReg(gr).value
+        const add = r2 !== undefined
+            ? r2 == GR.GR0 ? 0 : this.grToReg(r2).value
             : 0;
 
         const index = adr + add;
@@ -372,17 +375,18 @@ export class Comet2 {
     /**
      * 実効アドレスの内容を返す
      */
-    private effectiveAddressContent(gr: GR, adr?: number) {
-        if (adr == undefined) {
-            return this.grToReg(gr).value;
-        } else {
-            return this._memory.getMemroyValue(this.effectiveAddress(adr, gr));
-        }
+    private effectiveAddressContent(adr: number, r2?: GR) {
+        const index = this.effectiveAddress(adr, r2);
+
+        return this._memory.getMemroyValue(index);
     }
 
     private calc(method: (a: number, b: number) => number, r1: GR, r2: GR, adr?: number) {
         const v1 = this.grToReg(r1).value;
-        const v2 = this.effectiveAddressContent(r2, adr);
+        const v2 = adr === undefined
+            ? this.grToReg(r2).value
+            : this.effectiveAddressContent(adr, r2);
+
         const ans = method(v1, v2);
         const r = ans & 0xFFFF;
 
