@@ -4,6 +4,7 @@
  * Register16bit
  */
 export class Register16bit {
+    private _initialValue: number;
 
     /**
      * レジスタ名
@@ -31,11 +32,14 @@ export class Register16bit {
     }
 
 
-    constructor(name: string, isIndexRegister: boolean, value?: number) {
+    constructor(name: string, isIndexRegister: boolean, initialValue?: number) {
         this._name = name;
         this._isIndexRegister = isIndexRegister;
-        if (value !== undefined) {
-            this._value = value;
-        }
+        this._initialValue = initialValue !== undefined ? initialValue : 0
+        this._value = this._initialValue;
+    }
+
+    reset() {
+        this._value = this._initialValue;
     }
 }

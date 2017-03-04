@@ -493,6 +493,28 @@ export class Comet2 {
     getStackActiveValue() {
         return this._stack.getActiveValue();
     }
+
+    /**
+     * COMET2を初期状態にします
+     */
+    resetState() {
+        this._GR0.reset();
+        this._GR1.reset();
+        this._GR2.reset();
+        this._GR3.reset();
+        this._GR4.reset();
+        this._GR5.reset();
+        this._GR6.reset();
+        this._GR7.reset();
+        this._GR8.reset();
+
+        this._OF.reset();
+        this._SF.reset();
+        this._ZF.reset();
+
+        this._stack.reset();
+        this._PR.reset();
+    }
 }
 
 export enum GR {

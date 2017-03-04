@@ -18,7 +18,6 @@ export class Flag {
 
     constructor(name: string) {
         this._name = name;
-
     }
 
     /**
@@ -41,5 +40,9 @@ export class Flag {
      */
     set(v: boolean) {
         this._value = v;
+    }
+
+    reset() {
+        this.putdown();
     }
 }

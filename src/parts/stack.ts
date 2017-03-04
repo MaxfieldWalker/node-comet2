@@ -8,8 +8,7 @@ export class Stack {
 
     constructor(memory: Memory) {
         this._memory = memory;
-        // 初期のSPの位置
-        this._sp = 0xffff;
+        this.reset();
     }
 
     public get SP() {
@@ -46,5 +45,10 @@ export class Stack {
         this._sp = newSp;
 
         return newSp;
+    }
+
+    reset() {
+        // 初期のSPの位置
+        this._sp = 0xffff;
     }
 }
