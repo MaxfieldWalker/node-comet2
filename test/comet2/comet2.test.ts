@@ -3,6 +3,23 @@
 import { Comet2, GR } from "../../src/comet2/comet2";
 import * as assert from "assert";
 
+function prepareOperation(v1: number, v2: number, comet2: Comet2, method: (r1: GR, r2: GR, adr?: number) => void) {
+    setValue(GR.GR1, v1, GR.GR2, v2, comet2, method);
+
+    method.bind(comet2)(GR.GR1, GR.GR2);
+}
+
+function prepareShiftOperation(v1: number, v2: number, comet2: Comet2, method: (r1: GR, adr: number, r2?: GR) => void) {
+    setValue(GR.GR1, v1, GR.GR2, v2, comet2, method);
+
+    method.bind(comet2)(GR.GR1, 0x0000, GR.GR2);
+}
+
+function setValue(r1: GR, v1: number, r2: GR, v2: number, comet2: Comet2, method: (r1: GR, r2: GR, adr?: number) => void) {
+    comet2.lad(r1, GR.GR0, v1);
+    comet2.lad(r2, GR.GR0, v2);
+}
+
 suite("Comet2 test", () => {
     test("NOP", () => {
         const comet2 = new Comet2();
@@ -58,13 +75,10 @@ suite("Comet2 test", () => {
         assert.equal(result, 0x0003);
     });
 
-
     suite("ADDA", () => {
         test("normal", () => {
             const comet2 = new Comet2();
-            comet2.lad(GR.GR1, GR.GR0, 0x0002);
-            comet2.lad(GR.GR2, GR.GR0, 0x0003);
-            comet2.adda(GR.GR1, GR.GR2);
+            prepareOperation(0x0002, 0x0003, comet2, comet2.adda);
 
             assert.equal(comet2.GR1, 0x0005);
             assert.equal(comet2.OF, false);
@@ -75,9 +89,7 @@ suite("Comet2 test", () => {
             const comet2 = new Comet2();
             // 0x4000 + 0x4000 = 0x8000 (-32768)より
             // OFフラグが立つ
-            comet2.lad(GR.GR1, GR.GR0, 0x4000);
-            comet2.lad(GR.GR2, GR.GR0, 0x4000);
-            comet2.adda(GR.GR1, GR.GR2);
+            prepareOperation(0x4000, 0x4000, comet2, comet2.adda);
 
             assert.equal(comet2.GR1, 0x8000);
             assert.equal(comet2.OF, true);
@@ -88,9 +100,7 @@ suite("Comet2 test", () => {
             const comet2 = new Comet2();
             // 0x8000(-32768) + 0xFFFF(-1) = 0x7FFF (32767)より
             // OFフラグが立つ
-            comet2.lad(GR.GR1, GR.GR0, 0x8000);
-            comet2.lad(GR.GR2, GR.GR0, 0xFFFF);
-            comet2.adda(GR.GR1, GR.GR2);
+            prepareOperation(0x8000, 0xFFFF, comet2, comet2.adda);
 
             assert.equal(comet2.GR1, 0x7FFF);
             assert.equal(comet2.OF, true);
@@ -101,9 +111,7 @@ suite("Comet2 test", () => {
             const comet2 = new Comet2();
             // 0xFFFF(-1) + 0x0001 = 0x0000より
             // ZFフラグが立つ
-            comet2.lad(GR.GR1, GR.GR0, 0xFFFF);
-            comet2.lad(GR.GR2, GR.GR0, 0x0001);
-            comet2.adda(GR.GR1, GR.GR2);
+            prepareOperation(0xFFFF, 0x0001, comet2, comet2.adda);
 
             assert.equal(comet2.GR1, 0x0000);
             assert.equal(comet2.OF, false);
@@ -115,9 +123,7 @@ suite("Comet2 test", () => {
     suite("ADDL", () => {
         test("normal", () => {
             const comet2 = new Comet2();
-            comet2.lad(GR.GR1, GR.GR0, 0x0002);
-            comet2.lad(GR.GR2, GR.GR0, 0x0003);
-            comet2.addl(GR.GR1, GR.GR2);
+            prepareOperation(0x0002, 0x0003, comet2, comet2.addl);
 
             assert.equal(comet2.GR1, 0x0005);
             assert.equal(comet2.OF, false);
@@ -128,9 +134,7 @@ suite("Comet2 test", () => {
             const comet2 = new Comet2();
             // 0x8000 + 0x8000 = 0x0000より
             // OFフラグが立つ
-            comet2.lad(GR.GR1, GR.GR0, 0x8000);
-            comet2.lad(GR.GR2, GR.GR0, 0x8000);
-            comet2.addl(GR.GR1, GR.GR2);
+            prepareOperation(0x8000, 0x8000, comet2, comet2.addl);
 
             assert.equal(comet2.GR1, 0x0000);
             assert.equal(comet2.OF, true);
@@ -143,9 +147,7 @@ suite("Comet2 test", () => {
     suite("SUBA", () => {
         test("normal", () => {
             const comet2 = new Comet2();
-            comet2.lad(GR.GR1, GR.GR0, 0x0003);
-            comet2.lad(GR.GR2, GR.GR0, 0x0002);
-            comet2.suba(GR.GR1, GR.GR2);
+            prepareOperation(0x0003, 0x0002, comet2, comet2.suba);
 
             assert.equal(comet2.GR1, 0x0001);
             assert.equal(comet2.OF, false);
@@ -156,9 +158,7 @@ suite("Comet2 test", () => {
             const comet2 = new Comet2();
             // 0x4000 - 0xC000 = 0x8000 (-32768)より
             // OFフラグが立つ
-            comet2.lad(GR.GR1, GR.GR0, 0x4000);
-            comet2.lad(GR.GR2, GR.GR0, 0xC000);
-            comet2.suba(GR.GR1, GR.GR2);
+            prepareOperation(0x4000, 0xC000, comet2, comet2.suba);
 
             assert.equal(comet2.GR1, 0x8000);
             assert.equal(comet2.OF, true);
@@ -169,9 +169,7 @@ suite("Comet2 test", () => {
             const comet2 = new Comet2();
             // 0x8000(-32768) - 0x0001 = 0x7FFF (32767)より
             // OFフラグが立つ
-            comet2.lad(GR.GR1, GR.GR0, 0x8000);
-            comet2.lad(GR.GR2, GR.GR0, 0x0001);
-            comet2.suba(GR.GR1, GR.GR2);
+            prepareOperation(0x8000, 0x0001, comet2, comet2.suba);
 
             assert.equal(comet2.GR1, 0x7FFF);
             assert.equal(comet2.OF, true);
@@ -182,9 +180,7 @@ suite("Comet2 test", () => {
             const comet2 = new Comet2();
             // 0xFFFF(-1) - 0xFFFF(-1) = 0x0000より
             // ZFフラグが立つ
-            comet2.lad(GR.GR1, GR.GR0, 0xFFFF);
-            comet2.lad(GR.GR2, GR.GR0, 0xFFFF);
-            comet2.suba(GR.GR1, GR.GR2);
+            prepareOperation(0xFFFF, 0xFFFF, comet2, comet2.suba);
 
             assert.equal(comet2.GR1, 0x0000);
             assert.equal(comet2.OF, false);
@@ -196,9 +192,7 @@ suite("Comet2 test", () => {
     suite("SUBL", () => {
         test("normal", () => {
             const comet2 = new Comet2();
-            comet2.lad(GR.GR1, GR.GR0, 0x0002);
-            comet2.lad(GR.GR2, GR.GR0, 0x0003);
-            comet2.subl(GR.GR1, GR.GR2);
+            prepareOperation(0x0002, 0x0003, comet2, comet2.subl);
 
             assert.equal(comet2.GR1, 0xFFFF);
             assert.equal(comet2.OF, false);
@@ -207,9 +201,7 @@ suite("Comet2 test", () => {
         });
         test("logical", () => {
             const comet2 = new Comet2();
-            comet2.lad(GR.GR1, GR.GR0, 0x8000);
-            comet2.lad(GR.GR2, GR.GR0, 0x0001);
-            comet2.subl(GR.GR1, GR.GR2);
+            prepareOperation(0x8000, 0x0001, comet2, comet2.subl);
 
             assert.equal(comet2.GR1, 0x7FFF);
             assert.equal(comet2.OF, false);
@@ -221,9 +213,7 @@ suite("Comet2 test", () => {
     suite("AND", () => {
         test("normal", () => {
             const comet2 = new Comet2();
-            comet2.lad(GR.GR1, GR.GR0, 0b0011);
-            comet2.lad(GR.GR2, GR.GR0, 0b0101);
-            comet2.and(GR.GR1, GR.GR2);
+            prepareOperation(0x0011, 0x0101, comet2, comet2.and);
 
             assert.equal(comet2.GR1, 0b0001);
             assert.equal(comet2.OF, false);
@@ -232,9 +222,7 @@ suite("Comet2 test", () => {
         });
         test("sign flag", () => {
             const comet2 = new Comet2();
-            comet2.lad(GR.GR1, GR.GR0, 0b1010000000000000);
-            comet2.lad(GR.GR2, GR.GR0, 0b1010111111111111);
-            comet2.and(GR.GR1, GR.GR2);
+            prepareOperation(0b1010000000000000, 0b1010111111111111, comet2, comet2.and);
 
             assert.equal(comet2.GR1, 0b1010000000000000);
             assert.equal(comet2.OF, false);
@@ -243,9 +231,7 @@ suite("Comet2 test", () => {
         });
         test("zero flag", () => {
             const comet2 = new Comet2();
-            comet2.lad(GR.GR1, GR.GR0, 0b1100);
-            comet2.lad(GR.GR2, GR.GR0, 0b0011);
-            comet2.and(GR.GR1, GR.GR2);
+            prepareOperation(0b1100, 0b0011, comet2, comet2.and);
 
             assert.equal(comet2.GR1, 0b0000);
             assert.equal(comet2.OF, false);
@@ -258,9 +244,7 @@ suite("Comet2 test", () => {
     suite("OR", () => {
         test("normal", () => {
             const comet2 = new Comet2();
-            comet2.lad(GR.GR1, GR.GR0, 0b0011);
-            comet2.lad(GR.GR2, GR.GR0, 0b0101);
-            comet2.or(GR.GR1, GR.GR2);
+            prepareOperation(0b0011, 0b0101, comet2, comet2.or);
 
             assert.equal(comet2.GR1, 0b0111);
             assert.equal(comet2.OF, false);
@@ -272,9 +256,7 @@ suite("Comet2 test", () => {
     suite("XOR", () => {
         test("normal", () => {
             const comet2 = new Comet2();
-            comet2.lad(GR.GR1, GR.GR0, 0b0011);
-            comet2.lad(GR.GR2, GR.GR0, 0b0101);
-            comet2.xor(GR.GR1, GR.GR2);
+            prepareOperation(0b0011, 0b0101, comet2, comet2.xor);
 
             assert.equal(comet2.GR1, 0b0110);
             assert.equal(comet2.OF, false);
@@ -286,9 +268,7 @@ suite("Comet2 test", () => {
     suite("CPA", () => {
         test("pattern 1", () => {
             const comet2 = new Comet2();
-            comet2.lad(GR.GR1, GR.GR0, 0x0002);
-            comet2.lad(GR.GR2, GR.GR0, 0x0001);
-            comet2.cpa(GR.GR1, GR.GR2);
+            prepareOperation(0x0002, 0x0001, comet2, comet2.cpa);
 
             assert.equal(comet2.OF, false);
             assert.equal(comet2.SF, false);
@@ -297,9 +277,7 @@ suite("Comet2 test", () => {
 
         test("pattern 2", () => {
             const comet2 = new Comet2();
-            comet2.lad(GR.GR1, GR.GR0, 0x0002);
-            comet2.lad(GR.GR2, GR.GR0, 0x0002);
-            comet2.cpa(GR.GR1, GR.GR2);
+            prepareOperation(0x0002, 0x0002, comet2, comet2.cpa);
 
             assert.equal(comet2.OF, false);
             assert.equal(comet2.SF, false);
@@ -308,9 +286,7 @@ suite("Comet2 test", () => {
 
         test("pattern 3", () => {
             const comet2 = new Comet2();
-            comet2.lad(GR.GR1, GR.GR0, 0x0001);
-            comet2.lad(GR.GR2, GR.GR0, 0x0002);
-            comet2.cpa(GR.GR1, GR.GR2);
+            prepareOperation(0x0001, 0x0002, comet2, comet2.cpa);
 
             assert.equal(comet2.OF, false);
             assert.equal(comet2.SF, true);
@@ -321,9 +297,7 @@ suite("Comet2 test", () => {
     suite("CPL", () => {
         test("logical", () => {
             const comet2 = new Comet2();
-            comet2.lad(GR.GR1, GR.GR0, 0x8000);
-            comet2.lad(GR.GR2, GR.GR0, 0x7FFF);
-            comet2.cpl(GR.GR1, GR.GR2);
+            prepareOperation(0x8000, 0x7FFF, comet2, comet2.cpl);
 
             assert.equal(comet2.OF, false);
             assert.equal(comet2.SF, false);
@@ -334,9 +308,7 @@ suite("Comet2 test", () => {
     suite("SLA", () => {
         test("normal", () => {
             const comet2 = new Comet2();
-            comet2.lad(GR.GR1, GR.GR0, 0x8001);
-            comet2.lad(GR.GR2, GR.GR0, 0x0001);
-            comet2.sla(GR.GR1, 0x0000, GR.GR2);
+            prepareShiftOperation(0x8001, 0x0001, comet2, comet2.sla);
 
             assert.equal(comet2.GR1, 0x8002);
             assert.equal(comet2.OF, false);
@@ -348,9 +320,7 @@ suite("Comet2 test", () => {
     suite("SRA", () => {
         test("normal", () => {
             const comet2 = new Comet2();
-            comet2.lad(GR.GR1, GR.GR0, 0x8002);
-            comet2.lad(GR.GR2, GR.GR0, 0x0001);
-            comet2.sra(GR.GR1, 0x0000, GR.GR2);
+            prepareShiftOperation(0x8002, 0x0001, comet2, comet2.sra);
 
             assert.equal(comet2.GR1, 0xC001);
             assert.equal(comet2.OF, false);
@@ -360,9 +330,7 @@ suite("Comet2 test", () => {
 
         test("overflow flag", () => {
             const comet2 = new Comet2();
-            comet2.lad(GR.GR1, GR.GR0, 0b0010);
-            comet2.lad(GR.GR2, GR.GR0, 0x0002);
-            comet2.sra(GR.GR1, 0x0000, GR.GR2);
+            prepareShiftOperation(0b0010, 0x0002, comet2, comet2.sra);
 
             assert.equal(comet2.GR1, 0x0000);
             assert.equal(comet2.OF, true);
@@ -374,9 +342,7 @@ suite("Comet2 test", () => {
     suite("SLL", () => {
         test("normal", () => {
             const comet2 = new Comet2();
-            comet2.lad(GR.GR1, GR.GR0, 0x8001);
-            comet2.lad(GR.GR2, GR.GR0, 0x0001);
-            comet2.sll(GR.GR1, 0x0000, GR.GR2);
+            prepareShiftOperation(0x8001, 0x0001, comet2, comet2.sll);
 
             assert.equal(comet2.GR1, 0x0002);
             assert.equal(comet2.OF, true);
@@ -389,9 +355,7 @@ suite("Comet2 test", () => {
     suite("SRL", () => {
         test("normal", () => {
             const comet2 = new Comet2();
-            comet2.lad(GR.GR1, GR.GR0, 0x8002);
-            comet2.lad(GR.GR2, GR.GR0, 0x0001);
-            comet2.srl(GR.GR1, 0x0000, GR.GR2);
+            prepareShiftOperation(0x8002, 0x0001, comet2, comet2.srl);
 
             assert.equal(comet2.GR1, 0x4001);
             assert.equal(comet2.OF, false);
