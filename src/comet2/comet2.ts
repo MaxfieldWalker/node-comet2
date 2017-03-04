@@ -7,7 +7,7 @@ import { Memory } from "../parts/memory";
 import { ALU, ALUMode } from "./alu";
 import { Comet2Option } from "./option";
 import { dumpTo2ByteArray } from "../util/hexdumpHelper";
-import { getMSB, toSigned } from "../util/bit";
+import { getMSB, toSigned, ShiftFunc, sla, sll, sra, srl } from "../util/bit";
 
 const defaultComet2Option: Comet2Option = {
     useGR8AsSP: false
@@ -321,22 +321,29 @@ export class Comet2 {
     /**
      * SLA命令
      */
-    public sla(r1: GR, r2: GR, adr: number) {
-        throw new Error("not implemented");
+    public sla(r1: GR, adr: number, r2?: GR) {
+        this.shiftOperation(sla, r1, adr, r2);
     }
 
     /**
      * SRA命令
      */
-    public sra(r1: GR, r2: GR, adr: number) {
-        throw new Error("not implemented");
+    public sra(r1: GR, adr: number, r2?: GR) {
+        this.shiftOperation(sra, r1, adr, r2);
     }
 
     /**
      * SLL命令
      */
-    public sll(r1: GR, r2: GR, adr: number) {
-        throw new Error("not implemented");
+    public sll(r1: GR, adr: number, r2?: GR) {
+        this.shiftOperation(sll, r1, adr, r2);
+    }
+
+    /**
+     * SRL命令
+     */
+    public srl(r1: GR, adr: number, r2?: GR) {
+        this.shiftOperation(srl, r1, adr, r2);
     }
 
     /**
@@ -378,13 +385,6 @@ export class Comet2 {
      * JOV命令
      */
     public jov(r1: GR, r2: GR, adr: number) {
-        throw new Error("not implemented");
-    }
-
-    /**
-     * SLA命令
-     */
-    public srl(r1: GR, r2: GR, adr: number) {
         throw new Error("not implemented");
     }
 
@@ -498,6 +498,23 @@ export class Comet2 {
 
         // フラグを設定する
         overflow ? this._OF.raise() : this._OF.putdown();
+        getMSB(r) == 1 ? this._SF.raise() : this._SF.putdown();
+        r == 0 ? this._ZF.raise() : this._ZF.putdown();
+    }
+
+    private shiftOperation(method: ShiftFunc, r1: GR, adr: number, r2?: GR) {
+        const reg1 = this.grToReg(r1);
+        const reg2 = r2 !== undefined ? this.grToReg(r2) : undefined;
+
+        const v1 = reg1.value;
+        const v2 = this.effectiveAddress(adr, reg2);
+        const { ans, lastExpelledBit } = method(v1, v2);
+        const r = ans & 0xFFFF;
+
+        reg1.value = r;
+
+        // フラグを設定する
+        lastExpelledBit == 1 ? this._OF.raise() : this._OF.putdown();
         getMSB(r) == 1 ? this._SF.raise() : this._SF.putdown();
         r == 0 ? this._ZF.raise() : this._ZF.putdown();
     }

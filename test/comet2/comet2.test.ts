@@ -330,4 +330,73 @@ suite("Comet2 test", () => {
             assert.equal(comet2.ZF, false);
         });
     });
+
+    suite("SLA", () => {
+        test("normal", () => {
+            const comet2 = new Comet2();
+            comet2.lad(GR.GR1, GR.GR0, 0x8001);
+            comet2.lad(GR.GR2, GR.GR0, 0x0001);
+            comet2.sla(GR.GR1, 0x0000, GR.GR2);
+
+            assert.equal(comet2.GR1, 0x8002);
+            assert.equal(comet2.OF, false);
+            assert.equal(comet2.SF, true);
+            assert.equal(comet2.ZF, false);
+        });
+    });
+
+    suite("SRA", () => {
+        test("normal", () => {
+            const comet2 = new Comet2();
+            comet2.lad(GR.GR1, GR.GR0, 0x8002);
+            comet2.lad(GR.GR2, GR.GR0, 0x0001);
+            comet2.sra(GR.GR1, 0x0000, GR.GR2);
+
+            assert.equal(comet2.GR1, 0xC001);
+            assert.equal(comet2.OF, false);
+            assert.equal(comet2.SF, true);
+            assert.equal(comet2.ZF, false);
+        });
+
+        test("overflow flag", () => {
+            const comet2 = new Comet2();
+            comet2.lad(GR.GR1, GR.GR0, 0b0010);
+            comet2.lad(GR.GR2, GR.GR0, 0x0002);
+            comet2.sra(GR.GR1, 0x0000, GR.GR2);
+
+            assert.equal(comet2.GR1, 0x0000);
+            assert.equal(comet2.OF, true);
+            assert.equal(comet2.SF, false);
+            assert.equal(comet2.ZF, true);
+        });
+    });
+
+    suite("SLL", () => {
+        test("normal", () => {
+            const comet2 = new Comet2();
+            comet2.lad(GR.GR1, GR.GR0, 0x8001);
+            comet2.lad(GR.GR2, GR.GR0, 0x0001);
+            comet2.sll(GR.GR1, 0x0000, GR.GR2);
+
+            assert.equal(comet2.GR1, 0x0002);
+            assert.equal(comet2.OF, true);
+            assert.equal(comet2.SF, false);
+            assert.equal(comet2.ZF, false);
+        });
+    });
+
+
+    suite("SRL", () => {
+        test("normal", () => {
+            const comet2 = new Comet2();
+            comet2.lad(GR.GR1, GR.GR0, 0x8002);
+            comet2.lad(GR.GR2, GR.GR0, 0x0001);
+            comet2.srl(GR.GR1, 0x0000, GR.GR2);
+
+            assert.equal(comet2.GR1, 0x4001);
+            assert.equal(comet2.OF, false);
+            assert.equal(comet2.SF, false);
+            assert.equal(comet2.ZF, false);
+        });
+    });
 });

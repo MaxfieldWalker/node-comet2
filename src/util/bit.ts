@@ -47,6 +47,10 @@ function shift(method: (a: number, b: number) => number, isLogical: boolean, a: 
     return ans;
 }
 
+export interface ShiftFunc {
+    (a: number, b: number): ShiftResult;
+}
+
 export function sla(a: number, b: number): ShiftResult {
     const lshift = (a: number, b: number) => a << b;
     const ans = shift(lshift, false, a, b);
