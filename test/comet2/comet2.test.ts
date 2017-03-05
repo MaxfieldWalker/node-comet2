@@ -564,11 +564,11 @@ suite("Comet2 test", () => {
         comet2.lad(GR.GR5, GR.GR0, 0x05);
         comet2.lad(GR.GR6, GR.GR0, 0x06);
         comet2.lad(GR.GR7, GR.GR0, 0x07);
-        const gr8 = comet2.GR8;
+        comet2.lad(GR.GR8_SP, GR.GR0, 0xA000);
 
         comet2.rpush();
 
-        assert.equal(comet2.stack.getValue(0), gr8);
+        assert.equal(comet2.stack.getValue(0), 0xA000);
         assert.equal(comet2.stack.getValue(1), 0x07);
         assert.equal(comet2.stack.getValue(2), 0x06);
         assert.equal(comet2.stack.getValue(3), 0x05);
