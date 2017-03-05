@@ -577,4 +577,27 @@ suite("Comet2 test", () => {
         assert.equal(comet2.stack.getValue(6), 0x02);
         assert.equal(comet2.stack.getValue(7), 0x01);
     });
+
+    test("RPOP", () => {
+        const comet2 = new Comet2();
+        comet2.stack.push(0x01);
+        comet2.stack.push(0x02);
+        comet2.stack.push(0x03);
+        comet2.stack.push(0x04);
+        comet2.stack.push(0x05);
+        comet2.stack.push(0x06);
+        comet2.stack.push(0x07);
+        comet2.stack.push(0x08);
+
+        comet2.rpop();
+
+        assert.equal(comet2.GR8, 0x08);
+        assert.equal(comet2.GR7, 0x07);
+        assert.equal(comet2.GR6, 0x06);
+        assert.equal(comet2.GR5, 0x05);
+        assert.equal(comet2.GR4, 0x04);
+        assert.equal(comet2.GR3, 0x03);
+        assert.equal(comet2.GR2, 0x02);
+        assert.equal(comet2.GR1, 0x01);
+    });
 });

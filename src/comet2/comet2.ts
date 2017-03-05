@@ -218,6 +218,7 @@ export class Comet2 {
         }
 
         if (inst == 0xA0) this.rpush();
+        if (inst == 0xA1) this.rpop();
 
         if (inst == 0xF0) this.svc(r2, address);
 
@@ -422,6 +423,17 @@ export class Comet2 {
         this.push(0, GR.GR6);
         this.push(0, GR.GR7);
         this.push(0, GR.GR8_SP);
+    }
+
+    rpop() {
+        this.pop(GR.GR8_SP);
+        this.pop(GR.GR7);
+        this.pop(GR.GR6);
+        this.pop(GR.GR5);
+        this.pop(GR.GR4);
+        this.pop(GR.GR3);
+        this.pop(GR.GR2);
+        this.pop(GR.GR1);
     }
 
     /**
