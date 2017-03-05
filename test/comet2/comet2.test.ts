@@ -1,6 +1,7 @@
 "use strict";
 
-import { Comet2, GR } from "../../src/comet2/comet2";
+import { Comet2 } from "../../src/comet2/comet2";
+import { GR } from "@maxfield/node-casl2-comet2-core-common";
 import * as assert from "assert";
 
 function prepareOperation(v1: number, v2: number, comet2: Comet2, method: (r1: GR, r2: GR, adr?: number) => void) {

@@ -8,7 +8,7 @@ import { Comet2Option } from "./option";
 import { dumpTo2ByteArray } from "../util/hexdumpHelper";
 import { getMSB, toSigned } from "../util/bit";
 import { add, sub, and, or, xor, sla, sll, sra, srl, ShiftFunc } from "./calc";
-import { jisx0201 } from "@maxfield/node-casl2-comet2-core-common";
+import { jisx0201, GR } from "@maxfield/node-casl2-comet2-core-common";
 import { stdin, stdout, Input, Output } from "./io";
 
 const defaultComet2Option: Comet2Option = {
@@ -616,17 +616,4 @@ export class Comet2 {
         this._stack.reset();
         this._PR.reset();
     }
-}
-
-
-export enum GR {
-    GR0,
-    GR1,
-    GR2,
-    GR3,
-    GR4,
-    GR5,
-    GR6,
-    GR7,
-    GR8_SP
 }
