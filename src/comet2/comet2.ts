@@ -167,6 +167,9 @@ export class Comet2 {
         const memory = dumpTo2ByteArray(inputPath);
         this._memory.load(memory);
 
+        // .comファイルの最初の2バイト(1語)にプログラム開始番地が格納されている
+        this._PR.value = this._memory.getValue(0);
+
         // depthCountが0になったらプログラム終了とする
         this.depthCount = 1;
         while (this.depthCount > 0) {
