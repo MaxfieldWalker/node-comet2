@@ -8,6 +8,7 @@ import { Comet2Option } from "./option";
 import { dumpTo2ByteArray } from "../util/hexdumpHelper";
 import { getMSB, toSigned } from "../util/bit";
 import { add, sub, and, or, xor, sla, sll, sra, srl, ShiftFunc } from "./calc";
+import { jisx0201 } from "@maxfield/node-casl2-comet2-core-common";
 
 const defaultComet2Option: Comet2Option = {
     useGR8AsSP: false
@@ -79,7 +80,12 @@ export class Comet2 {
     }
 
     private _stack: Stack;
+
     private _memory: Memory;
+    get memory(): Memory {
+        return this._memory;
+    }
+
     private _PR: Register16bit;
     public get PR(): number {
         return this._PR.value;
@@ -111,7 +117,7 @@ export class Comet2 {
         };
     }
 
-    constructor(private _comet2Option: Comet2Option = defaultComet2Option) {
+    constructor(private _comet2Option: Comet2Option = defaultComet2Option, private _output: Output = output) {
         this._GR0 = new Register16bit("GR0", false, 0);
         this._GR1 = new Register16bit("GR1", true, 0);
         this._GR2 = new Register16bit("GR2", true, 0);
@@ -155,14 +161,14 @@ export class Comet2 {
         // TODO: .comファイルの先頭にラベル名を含めないならoffsetは不要
         const offset = 8;
         // PRの位置にある命令を取得
-        const v = this._memory.getMemroyValue(offset + pr);
+        const v = this._memory.getValue(offset + pr);
         // 上二桁が命令である
         const inst = (v & 0xFF00) >> 8;
         // r1は3桁目にある
         const r1 = this.numberToGR((v & 0x00F0) >> 4);
         // r2は4桁目にある
         const r2 = this.numberToGR(v & 0x000F);
-        const address = this._memory.getMemroyValue(offset + pr + 1);
+        const address = this._memory.getValue(offset + pr + 1);
 
         if (inst == 0x00) this.nop();
 
@@ -197,6 +203,11 @@ export class Comet2 {
 
         if (inst == 0x80) this.call(r2, address);
         if (inst == 0x81) this.ret();
+
+        if (inst == 0x91) {
+            const address2 = this._memory.getValue(offset + pr + 2);
+            this.out(address, address2);
+        }
 
         if (inst == 0xF0) this.svc(r2, address);
 
@@ -358,6 +369,19 @@ export class Comet2 {
         // 用途が無いので何もしない
     }
 
+    out(adr1: number, adr2: number): string {
+        const length = this.effectiveAddressContent(adr2);
+        // 上位8ビットは無視される仕様なので無視している
+        const values = this._memory.getValues(adr1, length).map(x => x & 0x00FF);
+        // TODO: エラー処理をする
+        const str = jisx0201.convertToString(values);
+        // 文字列を出力する
+        this._output(str);
+
+        this._PR.value = this._PR.value + 3;
+
+        return str;
+    }
 
     /**
      * 実効アドレスを求める
@@ -378,7 +402,7 @@ export class Comet2 {
     private effectiveAddressContent(adr: number, r2?: GR) {
         const index = this.effectiveAddress(adr, r2);
 
-        return this._memory.getMemroyValue(index);
+        return this._memory.getValue(index);
     }
 
     private calc(method: (a: number, b: number) => number, r1: GR, r2: GR, adr?: number) {
@@ -478,10 +502,6 @@ export class Comet2 {
         throw new Error();
     }
 
-    getMemoryValue(index: number): number {
-        return this._memory.getMemroyValue(index);
-    }
-
     setOF(v: boolean) {
         this._OF.set(v);
     }
@@ -519,6 +539,14 @@ export class Comet2 {
         this._stack.reset();
         this._PR.reset();
     }
+}
+
+const output: Output = (s: string) => {
+    process.stdout.write(s + "\r\n");
+}
+
+export interface Output {
+    (s: string): void;
 }
 
 export enum GR {

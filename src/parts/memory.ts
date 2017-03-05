@@ -1,5 +1,7 @@
 "use strict";
 
+import * as Immutable from "immutable";
+
 namespace MemoryConst {
     export const MinIndex = 0;
     export const MaxIndex = 65535;
@@ -26,12 +28,20 @@ export class Memory {
     /**
      * インデックスを指定してメモリの値を取得する
      */
-    public getMemroyValue(index: number): number {
+    public getValue(index: number): number {
         if (!this.isInMemoryArrayRange(index)) {
             throw new Error("aa");
         }
 
         return this._memory[index];
+    }
+
+    getValues(startIndex: number, length: number) {
+        if (length < 0) {
+            throw new Error();
+        }
+
+        return Immutable.Range(startIndex, startIndex + length).toArray().map(x => this.getValue(x));
     }
 
     /**
@@ -43,6 +53,10 @@ export class Memory {
         }
 
         this._memory[index] = value;
+    }
+
+    setMemoryValues(values: Array<number>, startIndex: number) {
+        values.forEach((x, i) => this.setMemoryValue(x, startIndex + i));
     }
 
 

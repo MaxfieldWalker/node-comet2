@@ -59,12 +59,12 @@ suite("Comet2 test", () => {
         comet2.lad(GR.GR2, GR.GR0, 0x0002);
         comet2.st(GR.GR2, 0x0100);
 
-        assert.equal(comet2.getMemoryValue(0x0100), 0x0002);
+        assert.equal(comet2.memory.getValue(0x0100), 0x0002);
 
         comet2.lad(GR.GR3, GR.GR0, 0x0003);
         comet2.st(GR.GR3, 0x0200, GR.GR2);
 
-        assert.equal(comet2.getMemoryValue(0x0202), 0x0003);
+        assert.equal(comet2.memory.getValue(0x0202), 0x0003);
     });
 
     test("LAD", () => {
@@ -532,5 +532,15 @@ suite("Comet2 test", () => {
         assert.equal(comet2.OF, of);
         assert.equal(comet2.SF, sf);
         assert.equal(comet2.ZF, zf);
+    });
+
+    test("OUT", () => {
+        const comet2 = new Comet2();
+        // OUT命令は上位8ビットを無視する
+        comet2.memory.setMemoryValues([0x1141, 0x2242, 0x3343, 0x4444, 0x5545], 0x0100);
+        comet2.memory.setMemoryValue(0x0005, 0x0200);
+        const out = comet2.out(0x0100, 0x0200);
+
+        assert.equal(out, "ABCDE");
     });
 });

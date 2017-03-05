@@ -23,14 +23,14 @@ export class Stack {
     public pop(): number {
         const oldSp = this._sp;
         const newSp = this.incrementSP();
-        return this._memory.getMemroyValue(oldSp);
+        return this._memory.getValue(oldSp);
     }
 
     /**
      * SPの指す値を返します
      */
     public getActiveValue() {
-        return this._memory.getMemroyValue(this.SP);
+        return this._memory.getValue(this.SP);
     }
 
     public incrementSP() {
