@@ -121,6 +121,12 @@ export class Comet2 {
         };
     }
 
+    /**
+     * サブルーチン呼び出しの深さを表す
+     * CALL命令でインクリメントされ，RET命令でデクリメントされる
+     */
+    private depthCount: number;
+
     constructor(private _comet2Option: Comet2Option = defaultComet2Option, private _input: Input = stdin, private _output: Output = stdout) {
         this._GR0 = new Register16bit("GR0", false, 0);
         this._GR1 = new Register16bit("GR1", true, 0);
@@ -156,13 +162,23 @@ export class Comet2 {
         throw new Error();
     }
 
-    public run(inputPath: string) {
-        // メモリにプログラムを載せる
+    start(inputPath: string) {
+        // メモリにプログラムを乗せる
         const memory = dumpTo2ByteArray(inputPath);
         this._memory.load(memory);
 
+        // depthCountが0になったらプログラム終了とする
+        this.depthCount = 1;
+        while (this.depthCount > 0) {
+            this.run();
+        }
+    }
+
+    public run() {
         const pr = this._PR.value;
-        // TODO: .comファイルの先頭にラベル名を含めないならoffsetは不要
+        // .comファイルの先頭16バイト(8語)は開始番地の格納に使用するため
+        // プログラム本体は17バイト目以降にあるので
+        // 8語だけオフセットを指定している
         const offset = 8;
         // PRの位置にある命令を取得
         const v = this._memory.getValue(offset + pr);
@@ -361,6 +377,8 @@ export class Comet2 {
      * CALL命令
      */
     public call(adr: number, r2?: GR) {
+        this.depthCount++;
+
         this._stack.push(this.PR);
         const v2 = this.effectiveAddress(adr, r2);
         this._PR.value = v2;
@@ -370,6 +388,8 @@ export class Comet2 {
      * RET命令
      */
     public ret() {
+        this.depthCount--;
+
         this._PR.value = this._stack.pop();
     }
 
