@@ -9,6 +9,7 @@ import { dumpTo2ByteArray } from "../util/hexdumpHelper";
 import { getMSB, toSigned } from "../util/bit";
 import { add, sub, and, or, xor, sla, sll, sra, srl, ShiftFunc } from "./calc";
 import { jisx0201 } from "@maxfield/node-casl2-comet2-core-common";
+import { stdin, stdout, Input, Output } from "./io";
 
 const defaultComet2Option: Comet2Option = {
     useGR8AsSP: false
@@ -117,7 +118,7 @@ export class Comet2 {
         };
     }
 
-    constructor(private _comet2Option: Comet2Option = defaultComet2Option, private _output: Output = output) {
+    constructor(private _comet2Option: Comet2Option = defaultComet2Option, private _input: Input = stdin, private _output: Output = stdout) {
         this._GR0 = new Register16bit("GR0", false, 0);
         this._GR1 = new Register16bit("GR1", true, 0);
         this._GR2 = new Register16bit("GR2", true, 0);
@@ -204,6 +205,10 @@ export class Comet2 {
         if (inst == 0x80) this.call(r2, address);
         if (inst == 0x81) this.ret();
 
+        if (inst == 0x90) {
+            const address2 = this._memory.getValue(offset + pr + 2);
+            this.in(address, address2);
+        }
         if (inst == 0x91) {
             const address2 = this._memory.getValue(offset + pr + 2);
             this.out(address, address2);
@@ -367,6 +372,26 @@ export class Comet2 {
      */
     public svc(adr: number, r2?: GR) {
         // 用途が無いので何もしない
+    }
+
+    in(adr1: number, adr2: number, input?: Input): string {
+        // 入力を受け付ける
+        const line = input ? input() : this._input();
+
+        // 最大256文字受け付ける
+        const length = Math.min(line.length, 256);
+        const sub = line.substr(0, length);
+        // TODO: エラー処理をする
+        const charCodes = jisx0201.convertToCharCodes(sub);
+
+        // 入力された文字列を格納する
+        this._memory.setMemoryValues(charCodes, adr1);
+        // 入力された文字列長を格納する
+        this._memory.setMemoryValue(length, adr2);
+
+        this._PR.value = this._PR.value + 3;
+
+        return sub;
     }
 
     out(adr1: number, adr2: number): string {
@@ -541,13 +566,6 @@ export class Comet2 {
     }
 }
 
-const output: Output = (s: string) => {
-    process.stdout.write(s + "\r\n");
-}
-
-export interface Output {
-    (s: string): void;
-}
 
 export enum GR {
     GR0,

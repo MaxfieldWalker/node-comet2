@@ -21,7 +21,8 @@
     "@types/mocha": "^2.2.32"
   },
   "dependencies": {
-    "@maxfield/node-casl2-comet2-core-common": "0.0.2",
-    "immutable": "^3.8.1"
+    "@maxfield/node-casl2-comet2-core-common": "^0.0.3",
+    "immutable": "^3.8.1",
+    "readline-sync": "^1.4.6"
   }
 }

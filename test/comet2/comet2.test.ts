@@ -534,6 +534,17 @@ suite("Comet2 test", () => {
         assert.equal(comet2.ZF, zf);
     });
 
+    test("IN", () => {
+        const comet2 = new Comet2();
+        comet2.in(0x0100, 0x0200, () => "ABCDE");
+
+        const charCodes = comet2.memory.getValues(0x0100, 5);
+        const length = comet2.memory.getValue(0x0200);
+
+        assert.deepEqual(charCodes, [0x0041, 0x0042, 0x0043, 0x0044, 0x0045]);
+        assert.equal(length, 5);
+    });
+
     test("OUT", () => {
         const comet2 = new Comet2();
         // OUT命令は上位8ビットを無視する
