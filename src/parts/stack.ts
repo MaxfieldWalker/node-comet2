@@ -33,6 +33,10 @@ export class Stack {
         return this._memory.getValue(this.SP);
     }
 
+    public getValue(offset: number) {
+        return this._memory.getValue(offset + this.SP);
+    }
+
     public incrementSP() {
         const newSp = this._sp + 1;
         this._sp = newSp;

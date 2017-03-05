@@ -81,6 +81,9 @@ export class Comet2 {
     }
 
     private _stack: Stack;
+    get stack(): Stack {
+        return this._stack;
+    }
 
     private _memory: Memory;
     get memory(): Memory {
@@ -213,6 +216,8 @@ export class Comet2 {
             const address2 = this._memory.getValue(offset + pr + 2);
             this.out(address, address2);
         }
+
+        if (inst == 0xA0) this.rpush();
 
         if (inst == 0xF0) this.svc(r2, address);
 
@@ -408,6 +413,17 @@ export class Comet2 {
         return str;
     }
 
+    rpush() {
+        this.push(0, GR.GR1);
+        this.push(0, GR.GR2);
+        this.push(0, GR.GR3);
+        this.push(0, GR.GR4);
+        this.push(0, GR.GR5);
+        this.push(0, GR.GR6);
+        this.push(0, GR.GR7);
+        this.push(0, GR.GR8_SP);
+    }
+
     /**
      * 実効アドレスを求める
      */
@@ -523,6 +539,7 @@ export class Comet2 {
         if (r == GR.GR5) return this._GR5;
         if (r == GR.GR6) return this._GR6;
         if (r == GR.GR7) return this._GR7;
+        if (r == GR.GR8_SP) return this._GR8;
 
         throw new Error();
     }
@@ -575,5 +592,6 @@ export enum GR {
     GR4,
     GR5,
     GR6,
-    GR7
+    GR7,
+    GR8_SP
 }

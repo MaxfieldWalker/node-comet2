@@ -554,4 +554,27 @@ suite("Comet2 test", () => {
 
         assert.equal(out, "ABCDE");
     });
+
+    test("RPUSH", () => {
+        const comet2 = new Comet2();
+        comet2.lad(GR.GR1, GR.GR0, 0x01);
+        comet2.lad(GR.GR2, GR.GR0, 0x02);
+        comet2.lad(GR.GR3, GR.GR0, 0x03);
+        comet2.lad(GR.GR4, GR.GR0, 0x04);
+        comet2.lad(GR.GR5, GR.GR0, 0x05);
+        comet2.lad(GR.GR6, GR.GR0, 0x06);
+        comet2.lad(GR.GR7, GR.GR0, 0x07);
+        const gr8 = comet2.GR8;
+
+        comet2.rpush();
+
+        assert.equal(comet2.stack.getValue(0), gr8);
+        assert.equal(comet2.stack.getValue(1), 0x07);
+        assert.equal(comet2.stack.getValue(2), 0x06);
+        assert.equal(comet2.stack.getValue(3), 0x05);
+        assert.equal(comet2.stack.getValue(4), 0x04);
+        assert.equal(comet2.stack.getValue(5), 0x03);
+        assert.equal(comet2.stack.getValue(6), 0x02);
+        assert.equal(comet2.stack.getValue(7), 0x01);
+    });
 });
