@@ -1,6 +1,7 @@
 "use strict";
 
 import { Comet2 } from "../../src/comet2/comet2";
+import { Comet2Option } from "../../src/comet2/option";
 import { GR } from "@maxfield/node-casl2-comet2-core-common";
 import * as assert from "assert";
 
@@ -556,49 +557,116 @@ suite("Comet2 test", () => {
         assert.equal(out, "ABCDE");
     });
 
-    test("RPUSH", () => {
-        const comet2 = new Comet2();
-        comet2.lad(GR.GR1, 0x01);
-        comet2.lad(GR.GR2, 0x02);
-        comet2.lad(GR.GR3, 0x03);
-        comet2.lad(GR.GR4, 0x04);
-        comet2.lad(GR.GR5, 0x05);
-        comet2.lad(GR.GR6, 0x06);
-        comet2.lad(GR.GR7, 0x07);
-        comet2.lad(GR.GR8_SP, 0xA000);
+    suite("RPUSH", () => {
+        test("use GR8", () => {
+            const option: Comet2Option = {
+                useGR8AsSP: true
+            };
+            const comet2 = new Comet2(option);
 
-        comet2.rpush();
+            comet2.lad(GR.GR1, 0x01);
+            comet2.lad(GR.GR2, 0x02);
+            comet2.lad(GR.GR3, 0x03);
+            comet2.lad(GR.GR4, 0x04);
+            comet2.lad(GR.GR5, 0x05);
+            comet2.lad(GR.GR6, 0x06);
+            comet2.lad(GR.GR7, 0x07);
+            comet2.lad(GR.GR8_SP, 0xA000);
 
-        assert.equal(comet2.stack.getValue(0), 0xA000);
-        assert.equal(comet2.stack.getValue(1), 0x07);
-        assert.equal(comet2.stack.getValue(2), 0x06);
-        assert.equal(comet2.stack.getValue(3), 0x05);
-        assert.equal(comet2.stack.getValue(4), 0x04);
-        assert.equal(comet2.stack.getValue(5), 0x03);
-        assert.equal(comet2.stack.getValue(6), 0x02);
-        assert.equal(comet2.stack.getValue(7), 0x01);
+            comet2.rpush();
+
+            // RPUSHはGR1から順にGR8まで値をプッシュするので
+            // GR7をプッシュした時点でSPは7だけ小さくなっている
+            assert.equal(comet2.stack.getValue(0), 0xA000 - 7);
+            assert.equal(comet2.stack.getValue(1), 0x07);
+            assert.equal(comet2.stack.getValue(2), 0x06);
+            assert.equal(comet2.stack.getValue(3), 0x05);
+            assert.equal(comet2.stack.getValue(4), 0x04);
+            assert.equal(comet2.stack.getValue(5), 0x03);
+            assert.equal(comet2.stack.getValue(6), 0x02);
+            assert.equal(comet2.stack.getValue(7), 0x01);
+        });
+
+        test("not use GR8", () => {
+            const option: Comet2Option = {
+                useGR8AsSP: false
+            };
+            const comet2 = new Comet2(option);
+
+            comet2.lad(GR.GR1, 0x01);
+            comet2.lad(GR.GR2, 0x02);
+            comet2.lad(GR.GR3, 0x03);
+            comet2.lad(GR.GR4, 0x04);
+            comet2.lad(GR.GR5, 0x05);
+            comet2.lad(GR.GR6, 0x06);
+            comet2.lad(GR.GR7, 0x07);
+
+            comet2.rpush();
+
+            assert.equal(comet2.stack.getValue(0), 0x07);
+            assert.equal(comet2.stack.getValue(1), 0x06);
+            assert.equal(comet2.stack.getValue(2), 0x05);
+            assert.equal(comet2.stack.getValue(3), 0x04);
+            assert.equal(comet2.stack.getValue(4), 0x03);
+            assert.equal(comet2.stack.getValue(5), 0x02);
+            assert.equal(comet2.stack.getValue(6), 0x01);
+        });
     });
 
-    test("RPOP", () => {
-        const comet2 = new Comet2();
-        comet2.stack.push(0x01);
-        comet2.stack.push(0x02);
-        comet2.stack.push(0x03);
-        comet2.stack.push(0x04);
-        comet2.stack.push(0x05);
-        comet2.stack.push(0x06);
-        comet2.stack.push(0x07);
-        comet2.stack.push(0x08);
+    suite("RPOP", () => {
+        test("use GR8", () => {
+            const option: Comet2Option = {
+                useGR8AsSP: true
+            };
 
-        comet2.rpop();
+            const comet2 = new Comet2(option);
+            comet2.stack.push(0x01);
+            comet2.stack.push(0x02);
+            comet2.stack.push(0x03);
+            comet2.stack.push(0x04);
+            comet2.stack.push(0x05);
+            comet2.stack.push(0x06);
+            comet2.stack.push(0x07);
+            comet2.stack.push(0xFFF8);
 
-        assert.equal(comet2.GR8, 0x08);
-        assert.equal(comet2.GR7, 0x07);
-        assert.equal(comet2.GR6, 0x06);
-        assert.equal(comet2.GR5, 0x05);
-        assert.equal(comet2.GR4, 0x04);
-        assert.equal(comet2.GR3, 0x03);
-        assert.equal(comet2.GR2, 0x02);
-        assert.equal(comet2.GR1, 0x01);
+            comet2.rpop();
+
+            // RPOPはGR8から順にGR1まで値をポップするので
+            // 0xFFF8(=0xFFFF-7)がGR8にポップされるようにしておけば
+            // この結果になる
+            assert.equal(comet2.GR8, 0xFFFF);
+            assert.equal(comet2.GR7, 0x07);
+            assert.equal(comet2.GR6, 0x06);
+            assert.equal(comet2.GR5, 0x05);
+            assert.equal(comet2.GR4, 0x04);
+            assert.equal(comet2.GR3, 0x03);
+            assert.equal(comet2.GR2, 0x02);
+            assert.equal(comet2.GR1, 0x01);
+        });
+
+        test("not use GR8", () => {
+            const option: Comet2Option = {
+                useGR8AsSP: false
+            };
+
+            const comet2 = new Comet2(option);
+            comet2.stack.push(0x01);
+            comet2.stack.push(0x02);
+            comet2.stack.push(0x03);
+            comet2.stack.push(0x04);
+            comet2.stack.push(0x05);
+            comet2.stack.push(0x06);
+            comet2.stack.push(0x07);
+
+            comet2.rpop();
+
+            assert.equal(comet2.GR7, 0x07);
+            assert.equal(comet2.GR6, 0x06);
+            assert.equal(comet2.GR5, 0x05);
+            assert.equal(comet2.GR4, 0x04);
+            assert.equal(comet2.GR3, 0x03);
+            assert.equal(comet2.GR2, 0x02);
+            assert.equal(comet2.GR1, 0x01);
+        });
     });
 });

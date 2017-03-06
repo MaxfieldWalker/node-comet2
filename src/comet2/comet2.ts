@@ -66,7 +66,9 @@ export class Comet2 {
         return this._GR7.value;
     }
 
-    private _GR8: Register16bit;
+    private get _GR8(): Register16bit {
+        return this._stack._SP;
+    }
     public get GR8(): number {
         return this._GR8.value;
     }
@@ -144,7 +146,6 @@ export class Comet2 {
         this._GR5 = new Register16bit("GR5", true, 0);
         this._GR6 = new Register16bit("GR6", true, 0);
         this._GR7 = new Register16bit("GR7", true, 0);
-        this._GR8 = new Register16bit("GR8", true, 0);
 
         this._OF = new Flag("OF");
         this._SF = new Flag("SF");
@@ -188,6 +189,12 @@ export class Comet2 {
         }
     }
 
+    private isValidGR = (rn: number): boolean => {
+        const min = 0;
+        const max = this._comet2Option.useGR8AsSP ? 8 : 7;
+        return rn >= min && rn <= max;
+    }
+
     public run() {
         const pr = this._PR.value;
         // PRの位置にある命令を取得
@@ -195,9 +202,16 @@ export class Comet2 {
         // 上二桁が命令である
         const inst = (v & 0xFF00) >> 8;
         // r1は3桁目にある
-        const r1 = this.numberToGR((v & 0x00F0) >> 4);
+        const rn1 = (v & 0x00F0) >> 4;
         // r2は4桁目にある
-        const r2 = this.numberToGR(v & 0x000F);
+        const rn2 = v & 0x000F;
+
+        const r1 = this.numberToGR(rn1);
+        const r2 = this.numberToGR(rn2);
+
+        if (!this.isValidGR(rn1)) throw new Error("Invalid GR");
+        if (!this.isValidGR(rn2)) throw new Error("Invalid GR");
+
         const address = this._memory.getValue(pr + 1);
 
         if (inst == 0x00) this.nop();
@@ -490,13 +504,19 @@ export class Comet2 {
         this.push(0, GR.GR5);
         this.push(0, GR.GR6);
         this.push(0, GR.GR7);
-        this.push(0, GR.GR8_SP);
+
+        if (this._comet2Option.useGR8AsSP) {
+            this.push(0, GR.GR8_SP);
+        }
 
         this.onePlusPR();
     }
 
     rpop() {
-        this.pop(GR.GR8_SP);
+        if (this._comet2Option.useGR8AsSP) {
+            this.pop(GR.GR8_SP);
+        }
+
         this.pop(GR.GR7);
         this.pop(GR.GR6);
         this.pop(GR.GR5);
