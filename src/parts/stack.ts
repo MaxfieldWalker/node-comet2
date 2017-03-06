@@ -17,24 +17,24 @@ export class Stack {
 
     public push(value: number) {
         const newSp = this.decrementSP();
-        this._memory.setMemoryValue(value, newSp);
+        this._memory.setMemoryValue(value, newSp, 0);
     }
 
     public pop(): number {
-        const oldSp = this._sp;
+        const v = this.getActiveValue();
         const newSp = this.incrementSP();
-        return this._memory.getValue(oldSp);
+        return v;
     }
 
     /**
      * SPの指す値を返します
      */
     public getActiveValue() {
-        return this._memory.getValue(this.SP);
+        return this.getValue(0);
     }
 
     public getValue(offset: number) {
-        return this._memory.getValue(offset + this.SP);
+        return this._memory.getValue(offset + this.SP, 0);
     }
 
     public incrementSP() {

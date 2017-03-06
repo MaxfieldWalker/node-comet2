@@ -15,6 +15,12 @@ const defaultComet2Option: Comet2Option = {
     useGR8AsSP: false
 };
 
+// .comファイルの先頭16バイト(8語)は開始番地の格納に使用するため
+// プログラム本体は17バイト目以降にあるので
+// 8語だけオフセットを指定している
+const offset = 8;
+
+
 /**
  * Comet2
  */
@@ -127,6 +133,8 @@ export class Comet2 {
      */
     private depthCount: number;
 
+    private step: number;
+
     constructor(private _comet2Option: Comet2Option = defaultComet2Option, private _input: Input = stdin, private _output: Output = stdout) {
         this._GR0 = new Register16bit("GR0", false, 0);
         this._GR1 = new Register16bit("GR1", true, 0);
@@ -142,7 +150,7 @@ export class Comet2 {
         this._SF = new Flag("SF");
         this._ZF = new Flag("ZF");
 
-        this._memory = new Memory();
+        this._memory = new Memory(offset);
         this._stack = new Stack(this._memory);
 
         // PRの最初の値は0
@@ -158,6 +166,7 @@ export class Comet2 {
         if (n == 5) return GR.GR5;
         if (n == 6) return GR.GR6;
         if (n == 7) return GR.GR7;
+        if (n == 8) return GR.GR8_SP;
 
         throw new Error();
     }
@@ -168,10 +177,12 @@ export class Comet2 {
         this._memory.load(memory);
 
         // .comファイルの最初の2バイト(1語)にプログラム開始番地が格納されている
-        this._PR.value = this._memory.getValue(0);
+        this._PR.value = this._memory.getValue(0, 0);
 
         // depthCountが0になったらプログラム終了とする
         this.depthCount = 1;
+        this.step = 0;
+
         while (this.depthCount > 0) {
             this.run();
         }
@@ -179,40 +190,47 @@ export class Comet2 {
 
     public run() {
         const pr = this._PR.value;
-        // .comファイルの先頭16バイト(8語)は開始番地の格納に使用するため
-        // プログラム本体は17バイト目以降にあるので
-        // 8語だけオフセットを指定している
-        const offset = 8;
         // PRの位置にある命令を取得
-        const v = this._memory.getValue(offset + pr);
+        const v = this._memory.getValue(pr);
         // 上二桁が命令である
         const inst = (v & 0xFF00) >> 8;
         // r1は3桁目にある
         const r1 = this.numberToGR((v & 0x00F0) >> 4);
         // r2は4桁目にある
         const r2 = this.numberToGR(v & 0x000F);
-        const address = this._memory.getValue(offset + pr + 1);
+        const address = this._memory.getValue(pr + 1);
 
         if (inst == 0x00) this.nop();
 
-        if (inst == 0x10 || 0x14) this.ld(r1, r2, address);
-        if (inst == 0x11) this.st(r1, r2, address);
-        if (inst == 0x12) this.lad(r1, r2, address);
+        if (inst == 0x10) this.ld(r1, r2, address);
+        if (inst == 0x14) this.ld(r1, r2);
 
-        if (inst == 0x20 || inst == 0x24) this.adda(r1, r2, address);
-        if (inst == 0x22 || inst == 0x26) this.addl(r1, r2, address);
-        if (inst == 0x21 || inst == 0x25) this.suba(r1, r2, address);
-        if (inst == 0x23 || inst == 0x27) this.subl(r1, r2, address);
-        if (inst == 0x30 || inst == 0x34) this.and(r1, r2, address);
-        if (inst == 0x31 || inst == 0x35) this.or(r1, r2, address);
-        if (inst == 0x32 || inst == 0x36) this.xor(r1, r2, address);
-        if (inst == 0x40 || inst == 0x44) this.cpa(r1, r2, address);
-        if (inst == 0x41 || inst == 0x45) this.cpl(r1, r2, address);
+        if (inst == 0x11) this.st(r1, address, r2);
+        if (inst == 0x12) this.lad(r1, address, r2);
 
-        if (inst == 0x50) this.sla(r1, r2, address);
-        if (inst == 0x51) this.sra(r1, r2, address);
-        if (inst == 0x52) this.sll(r1, r2, address);
-        if (inst == 0x53) this.srl(r1, r2, address);
+        if (inst == 0x20) this.adda(r1, r2, address);
+        if (inst == 0x24) this.adda(r1, r2);
+        if (inst == 0x22) this.addl(r1, r2, address);
+        if (inst == 0x26) this.addl(r1, r2);
+        if (inst == 0x21) this.suba(r1, r2, address);
+        if (inst == 0x25) this.suba(r1, r2);
+        if (inst == 0x23) this.subl(r1, r2, address);
+        if (inst == 0x27) this.subl(r1, r2);
+        if (inst == 0x30) this.and(r1, r2, address);
+        if (inst == 0x34) this.and(r1, r2);
+        if (inst == 0x31) this.or(r1, r2, address);
+        if (inst == 0x35) this.or(r1, r2);
+        if (inst == 0x32) this.xor(r1, r2, address);
+        if (inst == 0x36) this.xor(r1, r2);
+        if (inst == 0x40) this.cpa(r1, r2, address);
+        if (inst == 0x44) this.cpa(r1, r2);
+        if (inst == 0x41) this.cpl(r1, r2, address);
+        if (inst == 0x45) this.cpl(r1, r2);
+
+        if (inst == 0x50) this.sla(r1, address, r2);
+        if (inst == 0x51) this.sra(r1, address, r2);
+        if (inst == 0x52) this.sll(r1, address, r2);
+        if (inst == 0x53) this.srl(r1, address, r2);
 
         if (inst == 0x61) this.jmi(address, r2);
         if (inst == 0x62) this.jnz(address, r2);
@@ -221,18 +239,18 @@ export class Comet2 {
         if (inst == 0x65) this.jpl(address, r2);
         if (inst == 0x66) this.jov(address, r2);
 
-        if (inst == 0x70) this.push(r2, address);
+        if (inst == 0x70) this.push(address, r2);
         if (inst == 0x71) this.pop(r1);
 
-        if (inst == 0x80) this.call(r2, address);
+        if (inst == 0x80) this.call(address, r2);
         if (inst == 0x81) this.ret();
 
         if (inst == 0x90) {
-            const address2 = this._memory.getValue(offset + pr + 2);
+            const address2 = this._memory.getValue(pr + 2);
             this.in(address, address2);
         }
         if (inst == 0x91) {
-            const address2 = this._memory.getValue(offset + pr + 2);
+            const address2 = this._memory.getValue(pr + 2);
             this.out(address, address2);
         }
 
@@ -240,22 +258,26 @@ export class Comet2 {
         if (inst == 0xA1) this.rpop();
 
         if (inst == 0xF0) this.svc(r2, address);
-
-        if (inst < 0x61 || inst == 0x70 || inst == 0x71 || inst == 0xF0) {
-            this.updatePR(address);
-        }
     }
 
     private updatePR(adr?: number) {
-        const newPR = this._PR.value + (adr === undefined ? 1 : 2);
-        this._PR.value = newPR;
+        adr === undefined ? this.onePlusPR() : this.twoPlusPR();
     }
+
+    private plusPR(n: number) {
+        this._PR.value = this._PR.value + n;
+    }
+
+    private onePlusPR = () => this.plusPR(1);
+    private twoPlusPR = () => this.plusPR(2);
+    private threePlusPR = () => this.plusPR(3);
 
     /**
      * NOP命令
      */
     nop() {
         // 何もしない
+        this.onePlusPR();
     }
 
     /**
@@ -270,7 +292,13 @@ export class Comet2 {
         reg1.value = v;
 
         // LD命令はOFを0にする
-        this._OF.putdown();
+        this.setFR(
+            false,
+            getMSB(v) == 1,
+            v == 0
+        );
+
+        this.updatePR(adr);
     }
 
     /**
@@ -281,16 +309,20 @@ export class Comet2 {
 
         const effectiveAdr = this.effectiveAddress(adr, r2);
         this._memory.setMemoryValue(reg1.value, effectiveAdr);
+
+        this.twoPlusPR();
     }
 
     /**
      * LAD命令
      */
-    public lad(r1: GR, r2: GR, adr: number) {
+    public lad(r1: GR, adr: number, r2?: GR) {
         const reg1 = this.grToReg(r1);
 
         const v2 = this.effectiveAddress(adr, r2);
         reg1.value = v2;
+
+        this.twoPlusPR();
     }
 
 
@@ -367,6 +399,8 @@ export class Comet2 {
     public push(adr: number, r2?: GR) {
         const v2 = this.effectiveAddress(adr, r2);
         this._stack.push(v2);
+
+        this.twoPlusPR();
     }
 
     /**
@@ -374,6 +408,8 @@ export class Comet2 {
      */
     public pop(r: GR) {
         this.grToReg(r).value = this._stack.pop();
+
+        this.onePlusPR();
     }
 
     /**
@@ -381,6 +417,10 @@ export class Comet2 {
      */
     public call(adr: number, r2?: GR) {
         this.depthCount++;
+
+        // CALL命令の次の命令に復帰できるように
+        // 先にPRを進めておく
+        this.twoPlusPR();
 
         this._stack.push(this.PR);
         const v2 = this.effectiveAddress(adr, r2);
@@ -401,6 +441,7 @@ export class Comet2 {
      */
     public svc(adr: number, r2?: GR) {
         // 用途が無いので何もしない
+        this.twoPlusPR();
     }
 
     in(adr1: number, adr2: number, input?: Input): string {
@@ -418,7 +459,7 @@ export class Comet2 {
         // 入力された文字列長を格納する
         this._memory.setMemoryValue(length, adr2);
 
-        this._PR.value = this._PR.value + 3;
+        this.threePlusPR();
 
         return sub;
     }
@@ -428,13 +469,17 @@ export class Comet2 {
         // 上位8ビットは無視される仕様なので無視している
         const values = this._memory.getValues(adr1, length).map(x => x & 0x00FF);
         // TODO: エラー処理をする
-        const str = jisx0201.convertToString(values);
-        // 文字列を出力する
-        this._output(str);
+        try {
+            const str = jisx0201.convertToString(values);
+            // 文字列を出力する
+            this._output(str);
 
-        this._PR.value = this._PR.value + 3;
+            this.threePlusPR();
 
-        return str;
+            return str;
+        } catch (error) {
+            throw new Error();
+        }
     }
 
     rpush() {
@@ -446,6 +491,8 @@ export class Comet2 {
         this.push(0, GR.GR6);
         this.push(0, GR.GR7);
         this.push(0, GR.GR8_SP);
+
+        this.onePlusPR();
     }
 
     rpop() {
@@ -457,6 +504,8 @@ export class Comet2 {
         this.pop(GR.GR3);
         this.pop(GR.GR2);
         this.pop(GR.GR1);
+
+        this.onePlusPR();
     }
 
     /**
@@ -468,7 +517,7 @@ export class Comet2 {
             ? r2 == GR.GR0 ? 0 : this.grToReg(r2).value
             : 0;
 
-        const index = adr + add;
+        const index = (adr + add) & 0xFFFF;
         return index;
     }
 
@@ -503,6 +552,8 @@ export class Comet2 {
             ans < 0,
             ans == 0
         );
+
+        this.updatePR(adr);
     }
 
     private logicalOperation(method: (a: number, b: number) => number, r1: GR, r2: GR, adr?: number) {
@@ -515,6 +566,8 @@ export class Comet2 {
             getMSB(r) == 1,
             r == 0
         );
+
+        this.updatePR(adr);
     }
 
     private operation(method: (a: number, b: number) => number, isLogical: boolean, r1: GR, r2: GR, adr?: number) {
@@ -531,6 +584,8 @@ export class Comet2 {
             getMSB(r) == 1,
             r == 0
         );
+
+        this.updatePR(adr);
     }
 
     private shiftOperation(method: ShiftFunc, r1: GR, adr: number, r2?: GR) {
@@ -548,6 +603,8 @@ export class Comet2 {
             lastExpelledBit == 1,
             getMSB(r) == 1,
             r == 0);
+
+        this.twoPlusPR();
     }
 
     private branchOperation(branchCondition: boolean, adr: number, r2?: GR) {
@@ -555,7 +612,7 @@ export class Comet2 {
             const v2 = this.effectiveAddress(adr, r2);
             this._PR.value = v2;
         } else {
-            this._PR.value = this.PR + 2;
+            this.twoPlusPR();
         }
     }
 

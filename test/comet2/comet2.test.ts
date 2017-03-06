@@ -17,8 +17,8 @@ function prepareShiftOperation(v1: number, v2: number, comet2: Comet2, method: (
 }
 
 function setValue(r1: GR, v1: number, r2: GR, v2: number, comet2: Comet2, method: (r1: GR, r2: GR, adr?: number) => void) {
-    comet2.lad(r1, GR.GR0, v1);
-    comet2.lad(r2, GR.GR0, v2);
+    comet2.lad(r1, v1);
+    comet2.lad(r2, v2);
 }
 
 suite("Comet2 test", () => {
@@ -48,7 +48,7 @@ suite("Comet2 test", () => {
 
     test("LD", () => {
         const comet2 = new Comet2();
-        comet2.lad(GR.GR2, GR.GR0, 0x0003);
+        comet2.lad(GR.GR2, 0x0003);
         comet2.ld(GR.GR1, GR.GR2);
 
         const result = comet2.GR1;
@@ -57,12 +57,12 @@ suite("Comet2 test", () => {
 
     test("ST", () => {
         const comet2 = new Comet2();
-        comet2.lad(GR.GR2, GR.GR0, 0x0002);
+        comet2.lad(GR.GR2, 0x0002);
         comet2.st(GR.GR2, 0x0100);
 
         assert.equal(comet2.memory.getValue(0x0100), 0x0002);
 
-        comet2.lad(GR.GR3, GR.GR0, 0x0003);
+        comet2.lad(GR.GR3, 0x0003);
         comet2.st(GR.GR3, 0x0200, GR.GR2);
 
         assert.equal(comet2.memory.getValue(0x0202), 0x0003);
@@ -70,7 +70,7 @@ suite("Comet2 test", () => {
 
     test("LAD", () => {
         const comet2 = new Comet2();
-        comet2.lad(GR.GR1, GR.GR0, 0x0003);
+        comet2.lad(GR.GR1, 0x0003);
 
         const result = comet2.GR1;
         assert.equal(result, 0x0003);
@@ -492,7 +492,7 @@ suite("Comet2 test", () => {
             comet2.call(0x0100);
 
             assert.equal(comet2.SP, oldSP - 1);
-            assert.equal(comet2.getStackActiveValue(), oldPR);
+            assert.equal(comet2.getStackActiveValue(), oldPR + 2);
             assert.equal(comet2.PR, 0x0100);
         });
     });
@@ -558,14 +558,14 @@ suite("Comet2 test", () => {
 
     test("RPUSH", () => {
         const comet2 = new Comet2();
-        comet2.lad(GR.GR1, GR.GR0, 0x01);
-        comet2.lad(GR.GR2, GR.GR0, 0x02);
-        comet2.lad(GR.GR3, GR.GR0, 0x03);
-        comet2.lad(GR.GR4, GR.GR0, 0x04);
-        comet2.lad(GR.GR5, GR.GR0, 0x05);
-        comet2.lad(GR.GR6, GR.GR0, 0x06);
-        comet2.lad(GR.GR7, GR.GR0, 0x07);
-        comet2.lad(GR.GR8_SP, GR.GR0, 0xA000);
+        comet2.lad(GR.GR1, 0x01);
+        comet2.lad(GR.GR2, 0x02);
+        comet2.lad(GR.GR3, 0x03);
+        comet2.lad(GR.GR4, 0x04);
+        comet2.lad(GR.GR5, 0x05);
+        comet2.lad(GR.GR6, 0x06);
+        comet2.lad(GR.GR7, 0x07);
+        comet2.lad(GR.GR8_SP, 0xA000);
 
         comet2.rpush();
 
