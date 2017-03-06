@@ -17,7 +17,7 @@ export class Stack {
 
     public push(value: number) {
         const newSp = this.decrementSP();
-        this._memory.setMemoryValue(value, newSp, 0);
+        this._memory.setMemoryValue(value, newSp);
     }
 
     public pop(): number {
@@ -34,7 +34,7 @@ export class Stack {
     }
 
     public getValue(offset: number) {
-        return this._memory.getValue(offset + this.SP, 0);
+        return this._memory.getValue(offset + this.SP);
     }
 
     public incrementSP() {

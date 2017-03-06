@@ -14,7 +14,7 @@ namespace MemoryConst {
 export class Memory {
     private _memory: Array<number>;
 
-    constructor(private _offset = 0) {
+    constructor() {
         this._memory = new Array(MemoryConst.MaxIndex - MemoryConst.MinIndex + 1);
 
         // 0埋め
@@ -23,24 +23,23 @@ export class Memory {
         }
     }
 
-    public load(memory: Array<number>) {
-        if (memory.length > MemoryConst.MaxIndex - MemoryConst.MinIndex + 1) throw new Error();
+    public load(memory: Array<number>, offset = 0) {
+        if (memory.length - offset > MemoryConst.MaxIndex - MemoryConst.MinIndex + 1) throw new Error();
 
         for (let i = 0; i < memory.length; i++) {
-            this._memory[i] = memory[i];
+            this._memory[i] = memory[offset + i];
         }
     }
 
     /**
      * インデックスを指定してメモリの値を取得する
      */
-    public getValue(index: number, offset?: number): number {
-        const ri = this.resolveIndex(index, offset);
-        if (!this.isInMemoryArrayRange(ri)) {
+    public getValue(index: number): number {
+        if (!this.isInMemoryArrayRange(index)) {
             throw new Error("aa");
         }
 
-        return this._memory[ri];
+        return this._memory[index];
     }
 
     getValues(startIndex: number, length: number) {
@@ -54,14 +53,12 @@ export class Memory {
     /**
      * インデックスを指定してメモリに値をセットする
      */
-    public setMemoryValue(value: number, index: number, offset?: number) {
-        const ri = this.resolveIndex(index, offset);
-
-        if (!this.isInMemoryArrayRange(ri)) {
+    public setMemoryValue(value: number, index: number) {
+        if (!this.isInMemoryArrayRange(index)) {
             throw new Error("aa");
         }
 
-        this._memory[ri] = value;
+        this._memory[index] = value;
     }
 
     setMemoryValues(values: Array<number>, startIndex: number) {
@@ -71,9 +68,5 @@ export class Memory {
 
     private isInMemoryArrayRange(index: number): boolean {
         return !(index < MemoryConst.MinIndex || index > MemoryConst.MaxIndex);
-    }
-
-    private resolveIndex(index: number, offset = this._offset) {
-        return (offset + index) & 0xFFFF;
     }
 }

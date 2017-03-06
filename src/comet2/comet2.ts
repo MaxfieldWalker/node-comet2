@@ -150,7 +150,7 @@ export class Comet2 {
         this._SF = new Flag("SF");
         this._ZF = new Flag("ZF");
 
-        this._memory = new Memory(offset);
+        this._memory = new Memory();
         this._stack = new Stack(this._memory);
 
         // PRの最初の値は0
@@ -173,11 +173,11 @@ export class Comet2 {
 
     start(inputPath: string) {
         // メモリにプログラムを乗せる
-        const memory = dumpTo2ByteArray(inputPath);
-        this._memory.load(memory);
+        const dump = dumpTo2ByteArray(inputPath);
+        this._memory.load(dump, offset);
 
         // .comファイルの最初の2バイト(1語)にプログラム開始番地が格納されている
-        this._PR.value = this._memory.getValue(0, 0);
+        this._PR.value = dump[0];
 
         // depthCountが0になったらプログラム終了とする
         this.depthCount = 1;
