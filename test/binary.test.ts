@@ -2,7 +2,7 @@
 
 import * as assert from "assert";
 import { Comet2 } from "../src/comet2/comet2";
-import { Output } from "../src/comet2/io";
+import { Input, Output } from "../src/comet2/io";
 import { Comet2Option } from "../src/comet2/option";
 import { read } from "../src/io/reader";
 import * as _ from "lodash";
@@ -15,16 +15,24 @@ function readLines(path: string): Array<string> {
     return lines;
 }
 
+const fileNames = (n: number) => {
+    // 0埋めする
+    // 1  -> "01"
+    // 12 -> "12"
+    const nn = _.padStart(n.toString(), 2, "0");
+    return [`./test/testdata/normal_${nn}.com`, `./test/testdata/normal_${nn}.expected.txt`]
+}
+
 const createOutput = (lines: Array<string>) => (s: string) => {
     lines.push(s);
 };
 
-function binaryTest(sourcePath: string, expectedPath: string, option?: Comet2Option) {
+function binaryTest(sourcePath: string, expectedPath: string, option?: Comet2Option, input?: Input) {
     test("test: " + sourcePath, () => {
         const actualLines: Array<string> = [];
         const output: Output = createOutput(actualLines);
 
-        const comet2 = new Comet2(option, undefined, output);
+        const comet2 = new Comet2(option, input, output);
         comet2.start(sourcePath);
 
         const expectedLines = readLines(expectedPath);
@@ -33,24 +41,52 @@ function binaryTest(sourcePath: string, expectedPath: string, option?: Comet2Opt
     });
 }
 
-suite("binary test", () => {
-    suite("not use GR8", () => {
-        const fileNames = (n: number) => {
-            // 0埋めする
-            // 1  -> "01"
-            // 12 -> "12"
-            const nn = _.padStart(n.toString(), 2, "0");
-            return [`./test/testdata/normal_${nn}.com`, `./test/testdata/normal_${nn}.expected.txt`]
-        }
+function binaryTests(cases: Array<number>, option?: Comet2Option) {
+    for (const n of cases) {
+        const [sourcePath, expectedPath] = fileNames(n);
+        binaryTest(sourcePath, expectedPath, option);
+    }
+}
 
+suite("binary test", () => {
+    suite("use GR8", () => {
+        const cases = [3, 8, 9, 12, 13];
+        const option: Comet2Option = {
+            useGR8AsSP: true
+        };
+
+        binaryTests(cases, option);
+    });
+
+    suite("not use GR8", () => {
         const cases = [1, 2, 4, 5, 6, 7, 11];
         const option: Comet2Option = {
             useGR8AsSP: false
         };
 
-        for (const n of cases) {
-            const [sourcePath, expectedPath] = fileNames(n);
-            binaryTest(sourcePath, expectedPath, option);
+        binaryTests(cases, option);
+    });
+
+    // normal_10.comは最大公約数を求めるプログラムで
+    // 2つの数値の入力を受け付けるので別のテストに分けている
+    suite("IN", () => {
+        const [sourcePath, expectedPath] = fileNames(10);
+        const option: Comet2Option = {
+            useGR8AsSP: true
+        };
+
+        // 36と48を入力すると
+        // 最大公約数は12になる
+        let i = 0;
+        const input: Input = () => {
+            i++;
+
+            if (i == 1) return "36";
+            if (i == 2) return "48";
+
+            throw new Error();
         }
+
+        binaryTest(sourcePath, expectedPath, option, input);
     });
 });
