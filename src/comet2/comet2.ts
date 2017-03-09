@@ -251,10 +251,10 @@ export class Comet2 {
         return {
             PR: this.PR,
             // 次に実行する命令
-            nextInstruction: {
+            nextInstruction: this.running ? {
                 name: instructionName,
                 args: args
-            },
+            } : undefined,
             // ステップ数
             step: this._step,
             SP: this.SP,
@@ -774,7 +774,7 @@ export interface Comet2State {
     nextInstruction: {
         name: string;
         args: Array<string | number>;
-    };
+    } | undefined;
     // ステップ数
     step: number;
     SP: number;
