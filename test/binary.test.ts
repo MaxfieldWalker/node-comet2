@@ -33,7 +33,11 @@ function binaryTest(sourcePath: string, expectedPath: string, option?: Comet2Opt
         const output: Output = createOutput(actualLines);
 
         const comet2 = new Comet2(option, input, output);
-        comet2.start(sourcePath);
+        comet2.init(sourcePath);
+        while (true) {
+            const end = comet2.run();
+            if (end) break;
+        }
 
         const expectedLines = readLines(expectedPath);
 

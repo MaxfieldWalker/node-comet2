@@ -10,6 +10,7 @@ import { getMSB, toSigned } from "../util/bit";
 import { add, sub, and, or, xor, sla, sll, sra, srl, ShiftFunc } from "./calc";
 import { jisx0201, GR } from "@maxfield/node-casl2-comet2-core-common";
 import { stdin, stdout, Input, Output } from "./io";
+import { getInstructionInfo, ArgumentType } from "./instructions";
 
 const defaultComet2Option: Comet2Option = {
     useGR8AsSP: false
@@ -133,9 +134,9 @@ export class Comet2 {
      * サブルーチン呼び出しの深さを表す
      * CALL命令でインクリメントされ，RET命令でデクリメントされる
      */
-    private depthCount: number;
+    private _depthCount: number;
 
-    private step: number;
+    private _step: number;
 
     constructor(private _comet2Option: Comet2Option = defaultComet2Option, private _input: Input = stdin, private _output: Output = stdout) {
         this._GR0 = new Register16bit("GR0", false, 0);
@@ -172,21 +173,19 @@ export class Comet2 {
         throw new Error();
     }
 
-    start(inputPath: string) {
+    init(inputPath: string) {
+        this.resetState();
+
         // メモリにプログラムを乗せる
         const dump = dumpTo2ByteArray(inputPath);
         this._memory.load(dump, offset);
 
         // .comファイルの最初の2バイト(1語)にプログラム開始番地が格納されている
         this._PR.value = dump[0];
+    }
 
-        // depthCountが0になったらプログラム終了とする
-        this.depthCount = 1;
-        this.step = 0;
-
-        while (this.depthCount > 0) {
-            this.run();
-        }
+    public get running(): boolean {
+        return this._depthCount > 0;
     }
 
     private isValidGR = (rn: number): boolean => {
@@ -195,8 +194,8 @@ export class Comet2 {
         return rn >= min && rn <= max;
     }
 
-    public run() {
-        const pr = this._PR.value;
+    private parseBinary() {
+        const pr = this.PR;
         // PRの位置にある命令を取得
         const v = this._memory.getValue(pr);
         // 上二桁が命令である
@@ -206,13 +205,77 @@ export class Comet2 {
         // r2は4桁目にある
         const rn2 = v & 0x000F;
 
+        const address = this._memory.getValue(pr + 1);
+        const address2 = this._memory.getValue(pr + 2);
+
+        return { inst, rn1, rn2, address, address2 };
+    }
+
+    getState(): Comet2State {
+        const { inst, rn1, rn2, address, address2 } = this.parseBinary();
+
         const r1 = this.numberToGR(rn1);
         const r2 = this.numberToGR(rn2);
 
         if (!this.isValidGR(rn1)) throw new Error("Invalid GR");
         if (!this.isValidGR(rn2)) throw new Error("Invalid GR");
 
-        const address = this._memory.getValue(pr + 1);
+        const gr1 = this.grToReg(r1);
+        const gr2 = this.grToReg(r2);
+
+        const instInfo = getInstructionInfo(inst);
+        const { instructionName, argumentType } = instInfo;
+        const args: Array<number | string> = [];
+        switch (argumentType) {
+            case ArgumentType.none:
+                break;
+            case ArgumentType.r1_adr_r2:
+                args.push(gr1.name, address, gr2.name);
+            case ArgumentType.r1_r2:
+                args.push(gr1.name, gr2.name);
+            case ArgumentType.adr_r2:
+                args.push(address, gr2.name);
+            case ArgumentType.r:
+                args.push(gr1.name);
+            case ArgumentType.adr_adr:
+                args.push(address, address2);
+            default:
+                break;
+        }
+
+        return {
+            PR: this.PR,
+            // 次に実行する命令
+            nextInstruction: {
+                name: instructionName,
+                args: args
+            },
+            // ステップ数
+            step: this._step,
+            SP: this.SP,
+            FR: {
+                OF: this.OF,
+                SF: this.SF,
+                ZF: this.ZF
+            },
+            GR: {
+                GR0: this.GR0, GR1: this.GR1, GR2: this.GR2, GR3: this.GR3,
+                GR4: this.GR4, GR5: this.GR5, GR6: this.GR6, GR7: this.GR7
+            }
+        };
+    }
+
+
+    public run(): boolean {
+        if (!this.running) return true;
+
+        const { inst, rn1, rn2, address, address2 } = this.parseBinary();
+
+        const r1 = this.numberToGR(rn1);
+        const r2 = this.numberToGR(rn2);
+
+        if (!this.isValidGR(rn1)) throw new Error("Invalid GR");
+        if (!this.isValidGR(rn2)) throw new Error("Invalid GR");
 
         if (inst == 0x00) this.nop();
 
@@ -259,19 +322,17 @@ export class Comet2 {
         if (inst == 0x80) this.call(address, r2);
         if (inst == 0x81) this.ret();
 
-        if (inst == 0x90) {
-            const address2 = this._memory.getValue(pr + 2);
-            this.in(address, address2);
-        }
-        if (inst == 0x91) {
-            const address2 = this._memory.getValue(pr + 2);
-            this.out(address, address2);
-        }
+        if (inst == 0x90) this.in(address, address2);
+        if (inst == 0x91) this.out(address, address2);
 
         if (inst == 0xA0) this.rpush();
         if (inst == 0xA1) this.rpop();
 
         if (inst == 0xF0) this.svc(r2, address);
+
+        // TODO: いずれの命令にも当てはまらなかった場合の処理をする
+
+        return !this.running;
     }
 
     private updatePR(adr?: number) {
@@ -430,7 +491,7 @@ export class Comet2 {
      * CALL命令
      */
     public call(adr: number, r2?: GR) {
-        this.depthCount++;
+        this._depthCount++;
 
         // CALL命令の次の命令に復帰できるように
         // 先にPRを進めておく
@@ -445,7 +506,7 @@ export class Comet2 {
      * RET命令
      */
     public ret() {
-        this.depthCount--;
+        this._depthCount--;
 
         this._PR.value = this._stack.pop();
     }
@@ -676,6 +737,10 @@ export class Comet2 {
      * COMET2を初期状態にします
      */
     resetState() {
+        // depthCountが0になったらプログラム終了とする
+        this._depthCount = 1;
+        this._step = 0;
+
         this._GR0.reset();
         this._GR1.reset();
         this._GR2.reset();
@@ -691,6 +756,28 @@ export class Comet2 {
         this._ZF.reset();
 
         this._stack.reset();
+        this._memory.reset();
         this._PR.reset();
+    }
+}
+
+export interface Comet2State {
+    PR: number,
+    // 次に実行する命令
+    nextInstruction: {
+        name: string,
+        args: Array<string | number>
+    },
+    // ステップ数
+    step: number,
+    SP: number,
+    FR: {
+        OF: boolean,
+        SF: boolean,
+        ZF: boolean
+    },
+    GR: {
+        GR0: number, GR1: number, GR2: number, GR3: number,
+        GR4: number, GR5: number, GR6: number, GR7: number
     }
 }

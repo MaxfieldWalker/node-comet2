@@ -17,10 +17,7 @@ export class Memory {
     constructor() {
         this._memory = new Array(MemoryConst.MaxIndex - MemoryConst.MinIndex + 1);
 
-        // 0埋め
-        for (let i = 0; i < this._memory.length; i++) {
-            this._memory[i] = 0;
-        }
+        this.reset();
     }
 
     public load(memory: Array<number>, offset = 0) {
@@ -68,5 +65,12 @@ export class Memory {
 
     private isInMemoryArrayRange(index: number): boolean {
         return !(index < MemoryConst.MinIndex || index > MemoryConst.MaxIndex);
+    }
+
+    reset() {
+        // 0埋め
+        for (let i = 0; i < this._memory.length; i++) {
+            this._memory[i] = 0;
+        }
     }
 }
