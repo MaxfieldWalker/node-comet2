@@ -769,22 +769,23 @@ export class Comet2 {
 }
 
 export interface Comet2State {
-    PR: number,
+    PR: number;
     // 次に実行する命令
     nextInstruction: {
-        name: string,
-        args: Array<string | number>
-    },
+        name: string;
+        args: Array<string | number>;
+    };
     // ステップ数
-    step: number,
-    SP: number,
+    step: number;
+    SP: number;
     FR: {
-        OF: boolean,
-        SF: boolean,
-        ZF: boolean
-    },
+        OF: boolean;
+        SF: boolean;
+        ZF: boolean;
+    };
     GR: {
-        GR0: number, GR1: number, GR2: number, GR3: number,
-        GR4: number, GR5: number, GR6: number, GR7: number
+        GR0: number; GR1: number; GR2: number; GR3: number;
+        GR4: number; GR5: number; GR6: number; GR7: number;
+        [key: string]: number;
     }
 }
