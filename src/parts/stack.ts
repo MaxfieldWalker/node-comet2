@@ -3,6 +3,8 @@
 import { Memory } from "./memory";
 import { Register16bit } from "./register16bit";
 
+const defaultSPValue = 0xFFFF;
+
 export class Stack {
     private _sp: Register16bit;
 
@@ -26,7 +28,7 @@ export class Stack {
 
     public pop(): number {
         const v = this.getActiveValue();
-        const newSp = this.incrementSP();
+        if (this.SP < defaultSPValue) this.incrementSP();
         return v;
     }
 
@@ -57,6 +59,6 @@ export class Stack {
 
     reset() {
         // 初期のSPの位置
-        this._sp.value = 0xffff;
+        this._sp.value = defaultSPValue;
     }
 }
