@@ -231,16 +231,21 @@ export class Comet2 {
                 break;
             case ArgumentType.r1_adr_r2:
                 args.push(gr1.name, address, gr2.name);
+                break;
             case ArgumentType.r1_r2:
                 args.push(gr1.name, gr2.name);
+                break;
             case ArgumentType.adr_r2:
                 args.push(address, gr2.name);
+                break;
             case ArgumentType.r:
                 args.push(gr1.name);
+                break;
             case ArgumentType.adr_adr:
                 args.push(address, address2);
-            default:
                 break;
+            default:
+                throw new Error();
         }
 
         return {
@@ -331,6 +336,8 @@ export class Comet2 {
         if (inst == 0xF0) this.svc(r2, address);
 
         // TODO: いずれの命令にも当てはまらなかった場合の処理をする
+
+        this._step++;
 
         return !this.running;
     }
