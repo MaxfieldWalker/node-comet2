@@ -10,7 +10,8 @@ import { getMSB, toSigned } from "../util/bit";
 import { add, sub, and, or, xor, sla, sll, sra, srl, ShiftFunc } from "./calc";
 import { jisx0201, GR } from "@maxfield/node-casl2-comet2-core-common";
 import { stdin, stdout, Input, Output } from "./io";
-import { getInstructionInfo, ArgumentType } from "./instructions";
+import { getInstructionInfo } from "./instructions";
+import { ArgumentType } from "@maxfield/node-casl2-comet2-core-common";
 
 const defaultComet2Option: Comet2Option = {
     useGR8AsSP: false
@@ -782,6 +783,7 @@ export interface Comet2State {
         OF: boolean;
         SF: boolean;
         ZF: boolean;
+        [key: string]: boolean;
     };
     GR: {
         GR0: number; GR1: number; GR2: number; GR3: number;

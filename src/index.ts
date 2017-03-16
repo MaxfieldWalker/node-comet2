@@ -6,4 +6,3 @@ export { Comet2Option } from "./comet2/option";
 export { Register16bit } from "./parts/register16bit";
 export { Flag } from "./parts/flag";
 export { Input, Output } from "./comet2/io";
-export { ArgumentType, InstructionInfo } from "./comet2/instructions";
