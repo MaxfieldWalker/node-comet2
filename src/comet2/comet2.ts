@@ -174,13 +174,18 @@ export class Comet2 {
         throw new Error();
     }
 
-    init(inputPath: string) {
+    init(memory: Array<number>): void;
+    init(inputPath: string): void;
+
+    init(source: string | Array<number>): void {
         this.resetState();
 
-        // メモリにプログラムを乗せる
-        const dump = dumpTo2ByteArray(inputPath);
-        this._memory.load(dump, offset);
+        const dump = typeof source === "string"
+            ? dumpTo2ByteArray(source)
+            : source;
 
+        // メモリにプログラムを乗せる
+        this._memory.load(dump, offset);
         // .comファイルの最初の2バイト(1語)にプログラム開始番地が格納されている
         this._PR.value = dump[0];
     }
