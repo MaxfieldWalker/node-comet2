@@ -13,10 +13,10 @@ function createMap(info: Array<InstructionInfo>): Map<number, InstructionInfo> {
     const map = new Map<number, InstructionInfo>();
 
     // アセンブラ命令は除く
-    info.filter(x => x.type !== InstructionType.Assembler)
-        .forEach(x => {
-            map.set(x.code, x);
-        });
+    const withoutAssemblerInstruction = info.filter(x => x.type !== InstructionType.Assembler);
+    for (const inst of withoutAssemblerInstruction) {
+        map.set(inst.code, inst);
+    }
 
     return map;
 }

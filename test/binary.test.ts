@@ -35,7 +35,7 @@ function binaryTest(sourcePath: string, expectedPath: string, option?: Comet2Opt
         const comet2 = new Comet2(option, input, output);
         comet2.init(sourcePath);
         while (true) {
-            const end = comet2.run();
+            const end = comet2.stepInto();
             if (end) break;
         }
 

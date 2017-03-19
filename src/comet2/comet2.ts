@@ -232,6 +232,7 @@ export class Comet2 {
         const instInfo = getInstructionInfo(inst);
         const { instructionName, argumentType } = instInfo;
         const args: Array<number | string> = [];
+        // TODO: 他のArgumentTypeにも対応する
         switch (argumentType) {
             case ArgumentType.none:
                 break;
@@ -277,7 +278,11 @@ export class Comet2 {
     }
 
 
-    public run(): boolean {
+    /**
+     * 命令を一つ実行します。
+     * @return プログラムが終了した場合はtrue，そうでない場合はfalse
+     */
+    public stepInto(): boolean {
         if (!this.running) return true;
 
         const { inst, rn1, rn2, address, address2 } = this.parseBinary();
