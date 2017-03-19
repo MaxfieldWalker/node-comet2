@@ -1,6 +1,7 @@
 "use strict";
 
 import * as Immutable from "immutable";
+import * as _ from "lodash";
 
 namespace MemoryConst {
     export const MinIndex = 0;
@@ -32,9 +33,7 @@ export class Memory {
      * インデックスを指定してメモリの値を取得する
      */
     public getValue(index: number): number {
-        if (!this.isInMemoryArrayRange(index)) {
-            throw new Error("aa");
-        }
+        this.assertInMemoryRange(index);
 
         return this._memory[index];
     }
@@ -51,9 +50,7 @@ export class Memory {
      * インデックスを指定してメモリに値をセットする
      */
     public setMemoryValue(value: number, index: number) {
-        if (!this.isInMemoryArrayRange(index)) {
-            throw new Error("aa");
-        }
+        this.assertInMemoryRange(index);
 
         this._memory[index] = value;
     }
@@ -63,8 +60,12 @@ export class Memory {
     }
 
 
-    private isInMemoryArrayRange(index: number): boolean {
-        return !(index < MemoryConst.MinIndex || index > MemoryConst.MaxIndex);
+    private assertInMemoryRange(index: number): void {
+        const valid = !(index < MemoryConst.MinIndex || index > MemoryConst.MaxIndex);
+        if (!valid) {
+            const adr = "0x" + _.padStart(index.toString(16).toUpperCase(), 4, "0");
+            throw new Error(`Illegal memory access. Tried to access to ${adr}.`);
+        }
     }
 
     reset() {
