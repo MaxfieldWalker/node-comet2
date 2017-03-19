@@ -1,0 +1,9 @@
+CASL    START
+        LAD     GR1, 1
+        ST      GR1, BUF  ; DS領域に書き込む場合はエラーにならない
+        ST      GR1, 264  ; ぎりぎりDS領域なのでエラーにならない
+        ST      GR1, 265  ; DS領域外に書き込んでいるのでエラー(265=ONE)
+        RET
+BUF     DS      256
+ONE     DC      1
+        END

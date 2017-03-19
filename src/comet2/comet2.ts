@@ -1,5 +1,6 @@
 "use strict"
 
+import * as _ from "lodash";
 import { Register16bit } from "../parts/register16bit";
 import { Flag } from "../parts/flag";
 import { Stack } from "../parts/stack";
@@ -11,10 +12,12 @@ import { add, sub, and, or, xor, sla, sll, sra, srl, ShiftFunc } from "./calc";
 import { jisx0201, GR } from "@maxfield/node-casl2-comet2-core-common";
 import { stdin, stdout, Input, Output } from "./io";
 import { getInstructionInfo } from "./instructions";
-import { ArgumentType } from "@maxfield/node-casl2-comet2-core-common";
+import { ArgumentType, MemoryRange } from "@maxfield/node-casl2-comet2-core-common";
+import { Errors, createError } from "./errors";
 
 const defaultComet2Option: Comet2Option = {
-    useGR8AsSP: false
+    useGR8AsSP: false,
+    allowSelfModifying: false,
 };
 
 // .comファイルの先頭16バイト(8語)は開始番地の格納に使用するため
@@ -27,6 +30,7 @@ const offset = 8;
  * Comet2
  */
 export class Comet2 {
+    private _debugInfo: DebugInfo | undefined;
 
     private _GR0: Register16bit;
     public get GR0(): number {
@@ -174,10 +178,10 @@ export class Comet2 {
         throw new Error();
     }
 
-    init(memory: Array<number>): void;
-    init(inputPath: string): void;
+    init(memory: Array<number>, debugInfo?: DebugInfo): void;
+    init(inputPath: string, debugInfo?: DebugInfo): void;
 
-    init(source: string | Array<number>): void {
+    init(source: string | Array<number>, debugInfo?: DebugInfo): void {
         this.resetState();
 
         const dump = typeof source === "string"
@@ -188,6 +192,8 @@ export class Comet2 {
         this._memory.load(dump, offset);
         // .comファイルの最初の2バイト(1語)にプログラム開始番地が格納されている
         this._PR.value = dump[0];
+
+        this._debugInfo = debugInfo;
     }
 
     public get running(): boolean {
@@ -401,6 +407,10 @@ export class Comet2 {
         const reg1 = this.grToReg(r1);
 
         const effectiveAdr = this.effectiveAddress(adr, r2);
+        // ST命令はメモリを書き換えるので
+        // 書き換え先のアドレスをチェックする
+        this.checkAddress(effectiveAdr);
+
         this._memory.setMemoryValue(reg1.value, effectiveAdr);
 
         this.twoPlusPR();
@@ -538,6 +548,11 @@ export class Comet2 {
     }
 
     in(adr1: number, adr2: number, input?: Input): string {
+        // IN命令はメモリを書き換えるので
+        // 書き換え先のアドレスをチェックする
+        this.checkAddress(adr1);
+        this.checkAddress(adr2);
+
         // 入力を受け付ける
         const line = input ? input() : this._input();
 
@@ -735,6 +750,21 @@ export class Comet2 {
         throw new Error();
     }
 
+    /**
+    　* 自己書き換えをしようとしていないかをチェック
+    　* @param adress アドレス
+    　*/
+    private checkAddress(adress: number): void {
+        if (this._comet2Option.allowSelfModifying || this._debugInfo === undefined) return;
+
+        const { dsRanges } = this._debugInfo;
+        const invalidMemoryAccess = dsRanges.filter(x => !(adress >= x.start && adress < x.end)).length == dsRanges.length;
+        if (invalidMemoryAccess) {
+            const adr = "0x" + _.padStart(adress.toString(16).toUpperCase(), 4, "0");
+            throw createError(Errors.Invalid_memory_access_0_, adr);
+        }
+    }
+
     setOF(v: boolean) {
         this._OF.set(v);
     }
@@ -800,4 +830,8 @@ export interface Comet2State {
         GR4: number; GR5: number; GR6: number; GR7: number;
         [key: string]: number;
     }
+}
+
+export interface DebugInfo {
+    dsRanges: Array<MemoryRange>;
 }
