@@ -1,10 +1,19 @@
 "use strict";
 
 import { ArgumentType, InstructionInfo, instructionsInfo, InstructionType } from "@maxfield/node-casl2-comet2-core-common";
+import { strHex } from "../comet2/errors";
 
 export function getInstructionInfo(instCode: number): InstructionInfo {
     const inst = map.get(instCode);
-    if (inst === undefined) throw new Error();
+    if (inst === undefined) {
+        return {
+            instructionName: `INVALID (${strHex(instCode, 2)})`,
+            argumentType: ArgumentType.Unknown,
+            code: -1,
+            type: InstructionType.Unknown,
+            documentation: "不正な命令です。"
+        };
+    }
 
     return inst;
 }

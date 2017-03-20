@@ -257,8 +257,6 @@ export class Comet2 {
             case ArgumentType.adr_adr:
                 args.push(address, address2);
                 break;
-            default:
-                throw new Error();
         }
 
         return {
