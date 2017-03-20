@@ -4,9 +4,14 @@ import * as assert from "assert";
 import { Comet2, DebugInfo, Comet2State } from "../../src/comet2/comet2";
 import { Comet2Option } from "../../src/comet2/option";
 import { Errors, createError, RuntimeError } from "../../src/comet2/errors";
+import * as path from "path";
+
+function createPath(fileName: string) {
+    return path.join("./test/testdata/errors", fileName);
+}
 
 // 例外が発生することをテストする
-function testError(path: string, expectedError: RuntimeError, option: Comet2Option, debugInfo: DebugInfo) {
+function testError(path: string, expectedError: RuntimeError, option?: Comet2Option, debugInfo?: DebugInfo) {
     const comet2 = new Comet2(option);
 
     comet2.init(path, debugInfo);
@@ -26,7 +31,7 @@ function testError(path: string, expectedError: RuntimeError, option: Comet2Opti
 }
 
 // 例外が発生しないことをテストする
-function testNotError(path: string, option: Comet2Option, debugInfo: DebugInfo) {
+function testNotError(path: string, option?: Comet2Option, debugInfo?: DebugInfo) {
     const comet2 = new Comet2(option);
 
     comet2.init(path, debugInfo);
@@ -46,7 +51,7 @@ function testNotError(path: string, option: Comet2Option, debugInfo: DebugInfo) 
 
 suite("exception", () => {
     suite("invalid memory access", () => {
-        const binaryPath = "./test/testdata/exception/invalidMemoryAccess.com";
+        const binaryPath = createPath("invalidMemoryAccess.com");
         const debugInfo: DebugInfo = {
             dsRanges: [{ start: 9, end: 265 }]
         };
@@ -67,5 +72,11 @@ suite("exception", () => {
 
             testNotError(binaryPath, option, debugInfo);
         });
+    });
+
+    test("invalid instruction", () => {
+        const binaryPath = createPath("invalidInstruction.com");
+        testError(binaryPath,
+            createError(Errors.Invalid_instruction, "0x15"));
     });
 });

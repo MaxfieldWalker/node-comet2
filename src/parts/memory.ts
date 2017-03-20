@@ -2,6 +2,7 @@
 
 import * as Immutable from "immutable";
 import * as _ from "lodash";
+import { strHex } from "../comet2/errors";
 
 namespace MemoryConst {
     export const MinIndex = 0;
@@ -63,8 +64,7 @@ export class Memory {
     private assertInMemoryRange(index: number): void {
         const valid = !(index < MemoryConst.MinIndex || index > MemoryConst.MaxIndex);
         if (!valid) {
-            const adr = "0x" + _.padStart(index.toString(16).toUpperCase(), 4, "0");
-            throw new Error(`Illegal memory access. Tried to access to ${adr}.`);
+            throw new Error(`Illegal memory access. Tried to access to ${strHex(index, 4)}.`);
         }
     }
 

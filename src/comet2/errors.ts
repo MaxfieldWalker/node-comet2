@@ -1,5 +1,7 @@
 "use strict";
 
+import * as _ from "lodash";
+
 export enum RuntimeErrorCategory {
     Error,
     Warning
@@ -36,10 +38,19 @@ export function formatMessage(s: string, args: { [index: number]: string }): str
     return format;
 }
 
+export function strHex(n: number, length: number) {
+    return "0x" + _.padStart(n.toString(16).toUpperCase(), length, "0");
+}
+
 export const Errors = {
     Invalid_memory_access_0_: {
         code: 0,
         category: RuntimeErrorCategory.Error,
         message: "不正なメモリアクセスです ({0})。",
+    },
+    Invalid_instruction: {
+        code: 1,
+        category: RuntimeErrorCategory.Error,
+        message: "不正な命令です。 ({0})。",
     }
 };

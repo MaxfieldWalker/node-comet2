@@ -13,7 +13,7 @@ import { jisx0201, GR } from "@maxfield/node-casl2-comet2-core-common";
 import { stdin, stdout, Input, Output } from "./io";
 import { getInstructionInfo } from "./instructions";
 import { ArgumentType, MemoryRange } from "@maxfield/node-casl2-comet2-core-common";
-import { Errors, createError } from "./errors";
+import { Errors, createError, strHex } from "./errors";
 
 const defaultComet2Option: Comet2Option = {
     useGR8AsSP: false,
@@ -299,60 +299,64 @@ export class Comet2 {
         if (!this.isValidGR(rn1)) throw new Error("Invalid GR");
         if (!this.isValidGR(rn2)) throw new Error("Invalid GR");
 
-        if (inst == 0x00) this.nop();
+        switch (inst) {
+            case 0x00: this.nop(); break;
 
-        if (inst == 0x10) this.ld(r1, r2, address);
-        if (inst == 0x14) this.ld(r1, r2);
+            case 0x10: this.ld(r1, r2, address); break;
+            case 0x14: this.ld(r1, r2); break;
 
-        if (inst == 0x11) this.st(r1, address, r2);
-        if (inst == 0x12) this.lad(r1, address, r2);
+            case 0x11: this.st(r1, address, r2); break;
+            case 0x12: this.lad(r1, address, r2); break;
 
-        if (inst == 0x20) this.adda(r1, r2, address);
-        if (inst == 0x24) this.adda(r1, r2);
-        if (inst == 0x22) this.addl(r1, r2, address);
-        if (inst == 0x26) this.addl(r1, r2);
-        if (inst == 0x21) this.suba(r1, r2, address);
-        if (inst == 0x25) this.suba(r1, r2);
-        if (inst == 0x23) this.subl(r1, r2, address);
-        if (inst == 0x27) this.subl(r1, r2);
-        if (inst == 0x30) this.and(r1, r2, address);
-        if (inst == 0x34) this.and(r1, r2);
-        if (inst == 0x31) this.or(r1, r2, address);
-        if (inst == 0x35) this.or(r1, r2);
-        if (inst == 0x32) this.xor(r1, r2, address);
-        if (inst == 0x36) this.xor(r1, r2);
-        if (inst == 0x40) this.cpa(r1, r2, address);
-        if (inst == 0x44) this.cpa(r1, r2);
-        if (inst == 0x41) this.cpl(r1, r2, address);
-        if (inst == 0x45) this.cpl(r1, r2);
+            case 0x20: this.adda(r1, r2, address); break;
+            case 0x24: this.adda(r1, r2); break;
+            case 0x22: this.addl(r1, r2, address); break;
+            case 0x26: this.addl(r1, r2); break;
+            case 0x21: this.suba(r1, r2, address); break;
+            case 0x25: this.suba(r1, r2); break;
+            case 0x23: this.subl(r1, r2, address); break;
+            case 0x27: this.subl(r1, r2); break;
+            case 0x30: this.and(r1, r2, address); break;
+            case 0x34: this.and(r1, r2); break;
+            case 0x31: this.or(r1, r2, address); break;
+            case 0x35: this.or(r1, r2); break;
+            case 0x32: this.xor(r1, r2, address); break;
+            case 0x36: this.xor(r1, r2); break;
+            case 0x40: this.cpa(r1, r2, address); break;
+            case 0x44: this.cpa(r1, r2); break;
+            case 0x41: this.cpl(r1, r2, address); break;
+            case 0x45: this.cpl(r1, r2); break;
 
-        if (inst == 0x50) this.sla(r1, address, r2);
-        if (inst == 0x51) this.sra(r1, address, r2);
-        if (inst == 0x52) this.sll(r1, address, r2);
-        if (inst == 0x53) this.srl(r1, address, r2);
+            case 0x50: this.sla(r1, address, r2); break;
+            case 0x51: this.sra(r1, address, r2); break;
+            case 0x52: this.sll(r1, address, r2); break;
+            case 0x53: this.srl(r1, address, r2); break;
 
-        if (inst == 0x61) this.jmi(address, r2);
-        if (inst == 0x62) this.jnz(address, r2);
-        if (inst == 0x63) this.jze(address, r2);
-        if (inst == 0x64) this.jump(address, r2);
-        if (inst == 0x65) this.jpl(address, r2);
-        if (inst == 0x66) this.jov(address, r2);
+            case 0x61: this.jmi(address, r2); break;
+            case 0x62: this.jnz(address, r2); break;
+            case 0x63: this.jze(address, r2); break;
+            case 0x64: this.jump(address, r2); break;
+            case 0x65: this.jpl(address, r2); break;
+            case 0x66: this.jov(address, r2); break;
 
-        if (inst == 0x70) this.push(address, r2);
-        if (inst == 0x71) this.pop(r1);
+            case 0x70: this.push(address, r2); break;
+            case 0x71: this.pop(r1); break;
 
-        if (inst == 0x80) this.call(address, r2);
-        if (inst == 0x81) this.ret();
+            case 0x80: this.call(address, r2); break;
+            case 0x81: this.ret(); break;
 
-        if (inst == 0x90) this.in(address, address2);
-        if (inst == 0x91) this.out(address, address2);
+            case 0x90: this.in(address, address2); break;
+            case 0x91: this.out(address, address2); break;
 
-        if (inst == 0xA0) this.rpush();
-        if (inst == 0xA1) this.rpop();
+            case 0xA0: this.rpush(); break;
+            case 0xA1: this.rpop(); break;
 
-        if (inst == 0xF0) this.svc(r2, address);
+            case 0xF0: this.svc(r2, address); break;
 
-        // TODO: いずれの命令にも当てはまらなかった場合の処理をする
+            default:
+                // いずれの命令にも当てはまらなかった場合
+                throw createError(Errors.Invalid_instruction, strHex(inst, 2));
+        }
 
         this._step++;
 
@@ -754,14 +758,13 @@ export class Comet2 {
     　* 自己書き換えをしようとしていないかをチェック
     　* @param adress アドレス
     　*/
-    private checkAddress(adress: number): void {
+    private checkAddress(address: number): void {
         if (this._comet2Option.allowSelfModifying || this._debugInfo === undefined) return;
 
         const { dsRanges } = this._debugInfo;
-        const invalidMemoryAccess = dsRanges.filter(x => !(adress >= x.start && adress < x.end)).length == dsRanges.length;
+        const invalidMemoryAccess = dsRanges.filter(x => !(address >= x.start && address < x.end)).length == dsRanges.length;
         if (invalidMemoryAccess) {
-            const adr = "0x" + _.padStart(adress.toString(16).toUpperCase(), 4, "0");
-            throw createError(Errors.Invalid_memory_access_0_, adr);
+            throw createError(Errors.Invalid_memory_access_0_, strHex(address, 4));
         }
     }
 
