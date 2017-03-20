@@ -51,9 +51,14 @@ export const Errors = {
         category: RuntimeErrorCategory.Error,
         message: "不正なメモリアクセス('{0}')です。",
     },
-    Invalid_instruction: {
+    Invalid_instruction_0_: {
         code: 1,
         category: RuntimeErrorCategory.Error,
         message: "不正な命令('{0}')です。",
+    },
+    Invalid_GR_0_: {
+        code: 2,
+        category: RuntimeErrorCategory.Error,
+        message: "不正なGR('{0}')です。"
     }
 };

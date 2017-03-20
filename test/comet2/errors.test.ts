@@ -77,6 +77,6 @@ suite("exception", () => {
     test("invalid instruction", () => {
         const binaryPath = createPath("invalidInstruction.com");
         testError(binaryPath,
-            createError(Errors.Invalid_instruction, "0x15"));
+            createError(Errors.Invalid_instruction_0_, "0x15"));
     });
 });

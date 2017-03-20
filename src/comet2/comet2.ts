@@ -200,10 +200,13 @@ export class Comet2 {
         return this._depthCount > 0;
     }
 
-    private isValidGR = (rn: number): boolean => {
+    private assertIsValidGR = (rn: number): void => {
         const min = 0;
         const max = this._comet2Option.useGR8AsSP ? 8 : 7;
-        return rn >= min && rn <= max;
+        const valid = rn >= min && rn <= max;
+        if (!valid) {
+            throw createError(Errors.Invalid_GR_0_, `GR${rn}`);
+        }
     }
 
     private parseBinary() {
@@ -226,14 +229,8 @@ export class Comet2 {
     getState(): Comet2State {
         const { inst, rn1, rn2, address, address2 } = this.parseBinary();
 
-        const r1 = this.numberToGR(rn1);
-        const r2 = this.numberToGR(rn2);
-
-        if (!this.isValidGR(rn1)) throw new Error("Invalid GR");
-        if (!this.isValidGR(rn2)) throw new Error("Invalid GR");
-
-        const gr1 = this.grToReg(r1);
-        const gr2 = this.grToReg(r2);
+        const gr1 = "GR" + rn1;
+        const gr2 = "GR" + rn2;
 
         const instInfo = getInstructionInfo(inst);
         const { instructionName, argumentType } = instInfo;
@@ -242,16 +239,16 @@ export class Comet2 {
             case ArgumentType.none:
                 break;
             case ArgumentType.r1_adr_r2:
-                args.push(gr1.name, address, gr2.name);
+                args.push(gr1, address, gr2);
                 break;
             case ArgumentType.r1_r2:
-                args.push(gr1.name, gr2.name);
+                args.push(gr1, gr2);
                 break;
             case ArgumentType.adr_r2:
-                args.push(address, gr2.name);
+                args.push(address, gr2);
                 break;
             case ArgumentType.r:
-                args.push(gr1.name);
+                args.push(gr1);
                 break;
             case ArgumentType.adr_adr:
                 args.push(address, address2);
@@ -290,11 +287,11 @@ export class Comet2 {
 
         const { inst, rn1, rn2, address, address2 } = this.parseBinary();
 
+        this.assertIsValidGR(rn1);
+        this.assertIsValidGR(rn2);
+
         const r1 = this.numberToGR(rn1);
         const r2 = this.numberToGR(rn2);
-
-        if (!this.isValidGR(rn1)) throw new Error("Invalid GR");
-        if (!this.isValidGR(rn2)) throw new Error("Invalid GR");
 
         switch (inst) {
             case 0x00: this.nop(); break;
@@ -352,7 +349,7 @@ export class Comet2 {
 
             default:
                 // いずれの命令にも当てはまらなかった場合
-                throw createError(Errors.Invalid_instruction, strHex(inst, 2));
+                throw createError(Errors.Invalid_instruction_0_, strHex(inst, 2));
         }
 
         this._step++;
