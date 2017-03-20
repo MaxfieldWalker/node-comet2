@@ -13,10 +13,17 @@ export interface RuntimeErrorMessage {
     message: string;
 }
 
-export interface RuntimeError {
-    message: string;
-    code: number;
-    category: RuntimeErrorCategory;
+export class RuntimeError implements Error {
+    public name = "Runtime Error";
+
+    constructor(public message: string, public code: number, public category: RuntimeErrorCategory) {
+
+    }
+
+    toString() {
+        const strCode = _.padStart(this.code.toString(), 2, "0");
+        return `[${this.name}(${strCode})] ${this.message}`;
+    }
 }
 
 export function createError(error: RuntimeErrorMessage, ...args: Array<string>): RuntimeError {
@@ -24,11 +31,7 @@ export function createError(error: RuntimeErrorMessage, ...args: Array<string>):
         ? formatMessage(error.message, args)
         : error.message;
 
-    return {
-        message: message,
-        code: error.code,
-        category: error.category
-    };
+    return new RuntimeError(message, error.code, error.category);
 }
 
 // e.g. "Duplicate label '{0}'." -> "Duplicate label 'L1'."
@@ -46,11 +49,11 @@ export const Errors = {
     Invalid_memory_access_0_: {
         code: 0,
         category: RuntimeErrorCategory.Error,
-        message: "不正なメモリアクセスです ({0})。",
+        message: "不正なメモリアクセス('{0}')です。",
     },
     Invalid_instruction: {
         code: 1,
         category: RuntimeErrorCategory.Error,
-        message: "不正な命令です。 ({0})。",
+        message: "不正な命令('{0}')です。",
     }
 };
