@@ -238,7 +238,6 @@ export class Comet2 {
         const instInfo = getInstructionInfo(inst);
         const { instructionName, argumentType } = instInfo;
         const args: Array<number | string> = [];
-        // TODO: 他のArgumentTypeにも対応する
         switch (argumentType) {
             case ArgumentType.none:
                 break;
