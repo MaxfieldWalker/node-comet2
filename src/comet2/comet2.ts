@@ -564,24 +564,26 @@ export class Comet2 {
         // 最大256文字受け付ける
         const length = Math.min(line.length, 256);
         const sub = line.substr(0, length);
-        // TODO: エラー処理をする
-        const charCodes = jisx0201.convertToCharCodes(sub);
+        try {
+            const charCodes = jisx0201.convertToCharCodes(sub);
 
-        // 入力された文字列を格納する
-        this._memory.setMemoryValues(charCodes, adr1);
-        // 入力された文字列長を格納する
-        this._memory.setMemoryValue(length, adr2);
+            // 入力された文字列を格納する
+            this._memory.setMemoryValues(charCodes, adr1);
+            // 入力された文字列長を格納する
+            this._memory.setMemoryValue(length, adr2);
 
-        this.threePlusPR();
+            this.threePlusPR();
 
-        return sub;
+            return sub;
+        } catch (error) {
+            throw createError(Errors.Encode_failure_0_, sub);
+        }
     }
 
     out(adr1: number, adr2: number): string {
         const length = this.effectiveAddressContent(adr2);
         // 上位8ビットは無視される仕様なので無視している
         const values = this._memory.getValues(adr1, length).map(x => x & 0x00FF);
-        // TODO: エラー処理をする
         try {
             const str = jisx0201.convertToString(values);
             // 文字列を出力する
@@ -591,7 +593,7 @@ export class Comet2 {
 
             return str;
         } catch (error) {
-            throw new Error();
+            throw createError(Errors.Decode_failure_0_, values.toString());
         }
     }
 

@@ -60,5 +60,15 @@ export const Errors = {
         code: 2,
         category: RuntimeErrorCategory.Error,
         message: "不正なGR('{0}')です。"
-    }
+    },
+    Encode_failure_0_: {
+        code: 3,
+        category: RuntimeErrorCategory.Error,
+        message: "JIS X 0201でエンコードできません ('{0}')。"
+    },
+    Decode_failure_0_: {
+        code: 4,
+        category: RuntimeErrorCategory.Error,
+        message: "JIS X 0201でデコードできません ('{0}')。"
+    },
 };
