@@ -144,6 +144,13 @@ export class Comet2 {
     private _step: number;
 
     constructor(private _comet2Option: Comet2Option = defaultComet2Option, private _input: Input = stdin, private _output: Output = stdout) {
+        if (this._comet2Option.allowSelfModifying === undefined) {
+            this._comet2Option.allowSelfModifying = defaultComet2Option.allowSelfModifying;
+        }
+        if (this._comet2Option.useGR8AsSP === undefined) {
+            this._comet2Option.useGR8AsSP = defaultComet2Option.useGR8AsSP;
+        }
+
         this._GR0 = new Register16bit("GR0", false, 0);
         this._GR1 = new Register16bit("GR1", true, 0);
         this._GR2 = new Register16bit("GR2", true, 0);
