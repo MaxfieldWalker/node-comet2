@@ -5,7 +5,7 @@ import { Register16bit } from "../parts/register16bit";
 import { Flag } from "../parts/flag";
 import { Stack } from "../parts/stack";
 import { Memory } from "../parts/memory";
-import { Comet2Option } from "./option";
+import { Comet2Option, defaultComet2Option } from "./option";
 import { dumpTo2ByteArray } from "../util/hexdumpHelper";
 import { getMSB, toSigned } from "../util/bit";
 import { add, sub, and, or, xor, sla, sll, sra, srl, ShiftFunc } from "./calc";
@@ -15,10 +15,6 @@ import { getInstructionInfo } from "./instructions";
 import { ArgumentType, MemoryRange } from "@maxfield/node-casl2-comet2-core-common";
 import { Errors, createError, strHex } from "./errors";
 
-const defaultComet2Option: Comet2Option = {
-    useGR8AsSP: false,
-    allowSelfModifying: false,
-};
 
 // .comファイルの先頭16バイト(8語)は開始番地の格納に使用するため
 // プログラム本体は17バイト目以降にあるので
@@ -142,14 +138,10 @@ export class Comet2 {
     private _depthCount: number;
 
     private _step: number;
+    private _comet2Option: Comet2Option;
 
-    constructor(private _comet2Option: Comet2Option = defaultComet2Option, private _input: Input = stdin, private _output: Output = stdout) {
-        if (this._comet2Option.allowSelfModifying === undefined) {
-            this._comet2Option.allowSelfModifying = defaultComet2Option.allowSelfModifying;
-        }
-        if (this._comet2Option.useGR8AsSP === undefined) {
-            this._comet2Option.useGR8AsSP = defaultComet2Option.useGR8AsSP;
-        }
+    constructor(comet2Option?: Comet2Option, private _input: Input = stdin, private _output: Output = stdout) {
+        this._comet2Option = _.defaults(comet2Option, defaultComet2Option);
 
         this._GR0 = new Register16bit("GR0", false, 0);
         this._GR1 = new Register16bit("GR1", true, 0);

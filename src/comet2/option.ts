@@ -11,3 +11,9 @@ export interface Comet2Option {
      */
     allowSelfModifying?: boolean;
 }
+
+
+export const defaultComet2Option: Comet2Option = {
+    useGR8AsSP: false,
+    allowSelfModifying: false,
+};
