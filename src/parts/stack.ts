@@ -2,6 +2,7 @@
 
 import { Memory } from "./memory";
 import { Register16bit } from "./register16bit";
+import { Errors, createError } from "../comet2/errors";
 
 const defaultSPValue = 0xFFFF;
 
@@ -23,6 +24,9 @@ export class Stack {
 
     public push(value: number) {
         const newSp = this.decrementSP();
+        if (newSp < 0) {
+            throw createError(Errors.Stackoverflow);
+        }
         this._memory.setMemoryValue(value, newSp);
     }
 

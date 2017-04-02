@@ -71,4 +71,9 @@ export const Errors = {
         category: RuntimeErrorCategory.Error,
         message: "JIS X 0201でデコードできません ('{0}')。"
     },
+    Stackoverflow: {
+        code: 5,
+        category: RuntimeErrorCategory.Error,
+        message: "スタックオーバーフローが発生しました。"
+    }
 };
