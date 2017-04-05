@@ -9,7 +9,7 @@ export function hexDump(buf: Buffer): string {
     return buf.toString("hex", 0, buf.length);
 }
 
-export function dumpTo2ByteArray(path: string): Array<number> {
+export function dumpTo2ByteArray(path: string): number[] {
     const buf = read(path);
     const dump = hexDump(buf);
 
@@ -25,7 +25,7 @@ export function dumpTo2ByteArray(path: string): Array<number> {
 }
 
 export function splitTo2ByteArray(hexStr: string) {
-    const memory: Array<number> = [];
+    const memory: number[] = [];
 
     // 4桁ごと(2バイト)に区切って数値に変換
     for (let i = 0; i < hexStr.length / 4; i++) {

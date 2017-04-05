@@ -26,7 +26,7 @@ export class RuntimeError implements Error {
     }
 }
 
-export function createError(error: RuntimeErrorMessage, ...args: Array<string>): RuntimeError {
+export function createError(error: RuntimeErrorMessage, ...args: string[]): RuntimeError {
     const message = arguments.length > 1
         ? formatMessage(error.message, args)
         : error.message;

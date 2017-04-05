@@ -1,4 +1,4 @@
-"use strict"
+"use strict";
 
 import * as _ from "lodash";
 import { Register16bit } from "../parts/register16bit";
@@ -177,10 +177,10 @@ export class Comet2 {
         throw new Error();
     }
 
-    init(memory: Array<number>, debugInfo?: DebugInfo): void;
+    init(memory: number[], debugInfo?: DebugInfo): void;
     init(inputPath: string, debugInfo?: DebugInfo): void;
 
-    init(source: string | Array<number>, debugInfo?: DebugInfo): void {
+    init(source: string | number[], debugInfo?: DebugInfo): void {
         this.resetState();
 
         const dump = typeof source === "string"
@@ -233,7 +233,7 @@ export class Comet2 {
 
         const instInfo = getInstructionInfo(inst);
         const { instructionName, argumentType } = instInfo;
-        const args: Array<number | string> = [];
+        const args: (number | string)[] = [];
         switch (argumentType) {
             case ArgumentType.none:
                 break;
@@ -820,7 +820,7 @@ export interface Comet2State {
     // 次に実行する命令
     nextInstruction: {
         name: string;
-        args: Array<string | number>;
+        args: (string | number)[];
     } | undefined;
     // ステップ数
     step: number;
@@ -835,9 +835,9 @@ export interface Comet2State {
         GR0: number; GR1: number; GR2: number; GR3: number;
         GR4: number; GR5: number; GR6: number; GR7: number;
         [key: string]: number;
-    }
+    };
 }
 
 export interface DebugInfo {
-    dsRanges: Array<MemoryRange>;
+    dsRanges: MemoryRange[];
 }

@@ -14,7 +14,7 @@ namespace MemoryConst {
  * Memory (16 bits x 65536)
  */
 export class Memory {
-    private _memory: Array<number>;
+    private _memory: number[];
 
     constructor() {
         this._memory = new Array(MemoryConst.MaxIndex - MemoryConst.MinIndex + 1);
@@ -22,7 +22,7 @@ export class Memory {
         this.reset();
     }
 
-    public load(memory: Array<number>, offset = 0) {
+    public load(memory: number[], offset = 0) {
         if (memory.length - offset > MemoryConst.MaxIndex - MemoryConst.MinIndex + 1) throw new Error();
 
         for (let i = 0; i < memory.length; i++) {
@@ -56,7 +56,7 @@ export class Memory {
         this._memory[index] = value;
     }
 
-    setMemoryValues(values: Array<number>, startIndex: number) {
+    setMemoryValues(values: number[], startIndex: number) {
         values.forEach((x, i) => this.setMemoryValue(x, startIndex + i));
     }
 

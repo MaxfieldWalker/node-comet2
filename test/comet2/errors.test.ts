@@ -59,7 +59,7 @@ suite("exception", () => {
         test("don't allow self modifying", () => {
             const option: Comet2Option = {
                 allowSelfModifying: false
-            }
+            };
 
             testError(binaryPath,
                 createError(Errors.Invalid_memory_access_0_, "0x0109"), option, debugInfo);
@@ -68,7 +68,7 @@ suite("exception", () => {
         test("allow self modifying", () => {
             const option: Comet2Option = {
                 allowSelfModifying: true
-            }
+            };
 
             testNotError(binaryPath, option, debugInfo);
         });

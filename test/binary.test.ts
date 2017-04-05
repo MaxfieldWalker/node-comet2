@@ -8,7 +8,7 @@ import { read } from "../src/io/reader";
 import * as _ from "lodash";
 import * as Immutable from "immutable";
 
-function readLines(path: string): Array<string> {
+function readLines(path: string): string[] {
     const buf = read(path);
     // 末尾の改行を取り除いて一行ずつに分ける
     const lines = buf.toString().replace(/(\r\n|\r|\n)+$/, "").split(/\r\n|\r|\n/);
@@ -20,16 +20,16 @@ const fileNames = (n: number) => {
     // 1  -> "01"
     // 12 -> "12"
     const nn = _.padStart(n.toString(), 2, "0");
-    return [`./test/testdata/normal_${nn}.com`, `./test/testdata/normal_${nn}.expected.txt`]
-}
+    return [`./test/testdata/normal_${nn}.com`, `./test/testdata/normal_${nn}.expected.txt`];
+};
 
-const createOutput = (lines: Array<string>) => (s: string) => {
+const createOutput = (lines: string[]) => (s: string) => {
     lines.push(s);
 };
 
 function binaryTest(sourcePath: string, expectedPath: string, option?: Comet2Option, input?: Input) {
     test("test: " + sourcePath, () => {
-        const actualLines: Array<string> = [];
+        const actualLines: string[] = [];
         const output: Output = createOutput(actualLines);
 
         const comet2 = new Comet2(option, input, output);
@@ -45,7 +45,7 @@ function binaryTest(sourcePath: string, expectedPath: string, option?: Comet2Opt
     });
 }
 
-function binaryTests(cases: Array<number>, option?: Comet2Option) {
+function binaryTests(cases: number[], option?: Comet2Option) {
     for (const n of cases) {
         const [sourcePath, expectedPath] = fileNames(n);
         binaryTest(sourcePath, expectedPath, option);
@@ -89,7 +89,7 @@ suite("binary test", () => {
             if (i == 2) return "48";
 
             throw new Error();
-        }
+        };
 
         binaryTest(sourcePath, expectedPath, option, input);
     });

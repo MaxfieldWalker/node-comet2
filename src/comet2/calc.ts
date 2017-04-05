@@ -32,7 +32,7 @@ export const sla: ShiftFunc = (a: number, b: number): ShiftResult => {
         ans: ans,
         lastExpelledBit: getBit(a, 16 - b)
     };
-}
+};
 
 export const sll: ShiftFunc = (a: number, b: number): ShiftResult => {
     const lshift = (a: number, b: number) => a << b;
@@ -41,7 +41,7 @@ export const sll: ShiftFunc = (a: number, b: number): ShiftResult => {
         ans: ans,
         lastExpelledBit: getBit(a, 16 - b + 1)
     };
-}
+};
 
 export const sra: ShiftFunc = (a: number, b: number): ShiftResult => {
     const rshift = (a: number, b: number) => a >> b;
@@ -50,7 +50,7 @@ export const sra: ShiftFunc = (a: number, b: number): ShiftResult => {
         ans: ans,
         lastExpelledBit: b < 16 ? getBit(a, b) : getMSB(a)
     };
-}
+};
 
 export const srl: ShiftFunc = (a: number, b: number): ShiftResult => {
     const rshift = (a: number, b: number) => a >> b;
@@ -59,4 +59,4 @@ export const srl: ShiftFunc = (a: number, b: number): ShiftResult => {
         ans: ans,
         lastExpelledBit: getBit(a, b)
     };
-}
+};

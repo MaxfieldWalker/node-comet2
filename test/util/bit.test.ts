@@ -11,7 +11,7 @@ suite("bit test", () => {
         assert.equal(msb, 0);
 
         n = 0x8000;
-        msb = getMSB(n)
+        msb = getMSB(n);
         assert.equal(msb, 1);
     });
 
@@ -21,12 +21,12 @@ suite("bit test", () => {
         assert.equal(d, 0);
 
         n = 0xFFFF;
-        d = toSigned(n)
+        d = toSigned(n);
         assert.equal(d, -1);
 
 
         n = 0x8000;
-        d = toSigned(n)
+        d = toSigned(n);
         assert.equal(d, -32768);
     });
 });

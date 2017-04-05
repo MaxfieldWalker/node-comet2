@@ -18,7 +18,7 @@ export function getInstructionInfo(instCode: number): InstructionInfo {
     return inst;
 }
 
-function createMap(info: Array<InstructionInfo>): Map<number, InstructionInfo> {
+function createMap(info: InstructionInfo[]): Map<number, InstructionInfo> {
     const map = new Map<number, InstructionInfo>();
 
     // アセンブラ命令は除く
