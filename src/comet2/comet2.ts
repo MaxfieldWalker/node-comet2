@@ -238,13 +238,21 @@ export class Comet2 {
             case ArgumentType.none:
                 break;
             case ArgumentType.r1_adr_r2:
-                args.push(gr1, address, gr2);
+                if (rn2 == GR.GR0) {
+                    args.push(gr1, address);
+                } else {
+                    args.push(gr1, address, gr2);
+                }
                 break;
             case ArgumentType.r1_r2:
                 args.push(gr1, gr2);
                 break;
             case ArgumentType.adr_r2:
-                args.push(address, gr2);
+                if (rn2 == GR.GR0) {
+                    args.push(address);
+                } else {
+                    args.push(address, gr2);
+                }
                 break;
             case ArgumentType.r:
                 args.push(gr1);
